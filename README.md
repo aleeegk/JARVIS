@@ -1,39 +1,26 @@
-# 🤖 JARVIS — Suite de Asistentes Inteligentes para Windows
+# 🤖 JARVIS — Asistente Autónomo para Windows
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![Ollama](https://img.shields.io/badge/Ollama-Local%20AI-white?style=for-the-badge&logo=ollama&logoColor=black)](https://ollama.ai/)
-[![Gemini](https://img.shields.io/badge/Google-Gemini%20Live-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-**JARVIS** es un sistema modular de asistencia y automatización para Windows que combina inteligencia artificial local y en la nube. Integra visión computacional, síntesis de voz multicanal, control total del sistema operativo y una interfaz holográfica 3D inspirada en Stark Industries.
+**JARVIS** es un sistema autónomo de asistencia y automatización para Windows que opera de forma local e independiente. Integra visión computacional en tiempo real, síntesis de voz multicanal offline, control total del sistema operativo y una interfaz holográfica 3D inspirada en Stark Industries.
 
 ---
 
-## ⚡ Arquitecturas Disponibles
+## ⚡ Características Principales
 
-El proyecto cuenta con dos motores independientes según las necesidades de privacidad, potencia y conectividad:
-
-### 1. 🌐 JARVIS v5 — Motor Autónomo Local & Holográfico (Ollama)
-Diseñado para funcionar **100% offline**, garantizando máxima privacidad y control directo sobre el equipo:
-- **Modelo de IA:** `qwen2.5vl:7b` (Visión por computadora, razonamiento espacial, lectura de pantalla y ejecución de código).
-- **Interfaz Gráfica:** **Stark Mark VII HUD** (`jarvis_ui.html` + `jarvis_app.py` con PyWebView) con esfera holográfica 3D interactiva en Three.js, partículas reactivas y telemetría de hardware (CPU, RAM, disco).
-- **Control Remoto vía Telegram:** Daemon autónomo (`jarvis_telegram_daemon.py` / `telegram_control.py`) para interactuar con tu PC de forma remota (envío y recepción de archivos, capturas de pantalla, análisis visual con Qwen2.5-VL y ejecución de tareas).
+### 🌐 Motor Autónomo Local & Holográfico (Ollama)
+Diseñado para funcionar **100% en tu equipo**, garantizando máxima privacidad, baja latencia y control directo sobre el ordenador:
+- **Modelo de IA:** `qwen2.5vl:7b` vía Ollama (Visión por computadora, lectura de pantalla, ejecución de comandos y razonamiento espacial).
+- **Interfaz Gráfica:** **Stark Mark VII HUD** (`jarvis_ui.html` + `jarvis_app.py` mediante PyWebView) con esfera holográfica 3D interactiva en Three.js, partículas reactivas y telemetría de hardware (CPU, RAM, disco) en tiempo real.
+- **Control Remoto vía Telegram:** Daemon en segundo plano (`jarvis_telegram_daemon.py`) que permite ordenar tareas al PC desde el móvil: recepción y guardado de archivos, capturas de pantalla instantáneas, análisis visual con Qwen2.5-VL y ejecución de acciones.
 - **Síntesis de Voz Multicanal (TTS):**
-  - **Offline:** Kokoro TTS (82M parámetros, alta fidelidad natural) y Piper TTS (milisegundos de latencia).
+  - **Offline:** Kokoro TTS (82M parámetros, tono natural Paul Bettany) y Piper TTS (milisegundos de respuesta).
   - **Online:** Edge-TTS neural de alta definición.
   - **Sistema:** Voces nativas de Windows (SAPI5).
-- **Módulos de Automatización:** Visión de pantalla en tiempo real, control de navegadores, reproducción musical, correo, mensajería y productividad.
-
-### 2. ⚡ JARVIS Gemini Live — Motor en Tiempo Real (Google Cloud)
-Asistente multimodal interactivo diseñado para conversaciones bidireccionales fluidas por voz y control extendido:
-- **Modelo de IA:** Google Gemini Live API (`gemini-2.5-flash-native-audio-preview` vía WebSockets).
-- **Interfaz:** HUD dinámico con PyQt y panel de control web dashboard con métricas en tiempo real.
-- **Acciones y Herramientas (+20 controladores):**
-  - Control del ordenador, ventanas y configuración del sistema.
-  - Búsqueda web en vivo, resumen de videos de YouTube y reportes climáticos.
-  - Asistente de programación y agente desarrollador autónomo (`dev_agent.py`).
-  - Monitorización proactiva de tareas y recordatorios.
+- **Módulos de Automatización:** Visión de pantalla en tiempo real, navegación web, música en YouTube, gestión de correo y utilidades de productividad.
 
 ---
 
@@ -41,15 +28,7 @@ Asistente multimodal interactivo diseñado para conversaciones bidireccionales f
 
 ```plaintext
 JARVIS/
-├── 📂 apps/                       # Motores ejecutables del asistente
-│   ├── 📂 gemini_live/           # Asistente en tiempo real con Google Gemini
-│   │   ├── main.py               # Entrada principal (Voz + Live API)
-│   │   ├── ui.py                 # HUD en PyQt
-│   │   ├── actions/              # Controladores de automatización y SO
-│   │   ├── core/                 # Clientes LLM, STT, TTS y prompts
-│   │   ├── dashboard/            # Servidor web local y dashboard de control
-│   │   └── memory/               # Gestión de memoria y configuración dinámica
-│   │
+├── 📂 apps/                       # Aplicación principal de JARVIS
 │   └── 📂 ollama_v5/             # Asistente autónomo local con Ollama
 │       ├── jarvis_app.py         # Aplicación de escritorio con holograma 3D
 │       ├── jarvis_v5.py          # Motor de comandos y herramientas locales
@@ -58,8 +37,8 @@ JARVIS/
 │       ├── tts_manager.py        # Gestor multihilo de síntesis de voz
 │       └── modules/              # Módulos de visión, música, navegación, email...
 │
-├── 📂 config/                    # Plantillas de configuración y recursos compartidos
-│   ├── api_keys.example.json     # Plantilla para claves de API
+├── 📂 config/                    # Plantillas de configuración y recursos
+│   ├── api_keys.example.json     # Plantilla para configuración de claves
 │   ├── credentials.example.json  # Plantilla para credenciales OAuth de Google
 │   └── jarvis.ico                # Ícono oficial del sistema
 │
@@ -68,12 +47,12 @@ JARVIS/
 │   └── holograma-esfera-ia.html  # Prototipo independiente de la esfera 3D
 │
 ├── 🚀 Iniciar_JARVIS_Ollama_GUI.bat     # Inicia la interfaz 3D Holográfica (Ollama)
-├── 🚀 Iniciar_JARVIS_Ollama_Consola.bat # Inicia JARVIS v5 en terminal puro
-├── 🚀 Iniciar_JARVIS_Gemini.bat         # Inicia JARVIS Gemini Live en tiempo real
+├── 🚀 Iniciar_JARVIS_Ollama_Consola.bat # Inicia JARVIS v5 en consola de texto
 ├── 🚀 Iniciar_JARVIS_Telegram.bat       # Inicia el daemon de control por Telegram
 ├── .env.example                         # Plantilla de variables de entorno
 ├── .gitignore                           # Blindaje de seguridad y exclusiones
-├── requirements.txt                     # Dependencias oficiales del entorno Python
+├── CAMBIOS.md                           # Historial público de cambios
+├── requirements.txt                     # Dependencias del entorno Python
 └── setup.py                             # Instalador automatizado del entorno
 ```
 
@@ -84,7 +63,7 @@ JARVIS/
 ### 1. Prerrequisitos
 - **Sistema Operativo:** Windows 10 u 11 (64-bit).
 - **Python:** Versión 3.11 o superior.
-- **Ollama (para JARVIS v5 Local):** Descarga e instala [Ollama](https://ollama.ai/) y descarga el modelo multimodal:
+- **Ollama:** Descarga e instala [Ollama](https://ollama.ai/) y descarga el modelo multimodal:
   ```bash
   ollama pull qwen2.5vl:7b
   ```
@@ -98,38 +77,33 @@ python setup.py
 *O manualmente mediante pip:*
 ```bash
 pip install -r requirements.txt
-playwright install
 ```
 
-### 3. Configurar Claves y Entorno
-Copia las plantillas de ejemplo y añade tus credenciales correspondientes:
+### 3. Configuración de Credenciales
 - **Variables de entorno:**
-  Copia `.env.example` a `config/.env` o a la raíz `.env` y rellena las claves que desees usar (Telegram, Spotify, Google, etc.).
-- **Claves API de Gemini (si usas Gemini Live):**
-  Copia `config/api_keys.example.json` a `config/api_keys.json` y coloca tu `gemini_api_key`.
-- **Google OAuth (si usas Gmail/Calendar):**
+  Copia `.env.example` a `config/.env` o a la raíz `.env` y añade tu token de Telegram si deseas usar el control remoto.
+- **Google OAuth (para Gmail):**
   Coloca tu `credentials.json` en `config/credentials.json` (descargado desde Google Cloud Console).
 
 ---
 
 ## 🎮 Modos de Ejecución
 
-Puedes iniciar cualquier modo de JARVIS haciendo doble clic en sus lanzadores directos:
+Inicia JARVIS haciendo doble clic en cualquiera de sus accesos directos:
 
-| Acceso Directo | Modo de Operación | Descripción |
+| Acceso Directo | Modo | Descripción |
 | :--- | :--- | :--- |
-| **`Iniciar_JARVIS_Ollama_GUI.bat`** | **GUI Holográfica 3D** | Interfaz Stark Mark VII HUD con Three.js, voz offline y visión Qwen2.5-VL. |
+| **`Iniciar_JARVIS_Ollama_GUI.bat`** | **GUI Holográfica 3D** | Interfaz completa Stark Mark VII HUD con Three.js, voz y visión. |
 | **`Iniciar_JARVIS_Ollama_Consola.bat`** | **Consola Local** | Ejecución ligera por terminal para comandos directos con Ollama. |
 | **`Iniciar_JARVIS_Telegram.bat`** | **Daemon Telegram** | Control remoto 100% en segundo plano vía bot de Telegram. |
-| **`Iniciar_JARVIS_Gemini.bat`** | **Gemini Live** | Asistente conversacional por voz en tiempo real con la nube de Google. |
 
 ---
 
 ## 🔒 Seguridad y Privacidad
 
-- **Zero-Leak Policy:** El proyecto implementa un `.gitignore` estricto que previene el rastreo accidental de secretos (`.env`, tokens de Telegram, credenciales OAuth, claves privadas SSL y bases de datos locales).
-- **Modelos Locales:** Los modelos TTS pesados y checkpoints de IA se descargan y conservan en tu máquina local sin ser subidos a repositorios públicos.
-- **Autorización de Dispositivos:** El bot de Telegram restringe los comandos únicamente al identificador de chat del propietario autorizado (`TELEGRAM_ALLOWED_CHAT_ID`).
+- **Zero-Leak Policy:** `.gitignore` estricto que previene el rastreo accidental de secretos (`.env`, tokens de Telegram, credenciales OAuth, certificados SSL y bases de datos locales).
+- **Modelos Locales:** Los modelos TTS pesados y checkpoints de IA se conservan en tu máquina local sin ser subidos a repositorios públicos.
+- **Autorización Segura:** El bot de Telegram restringe los comandos únicamente al identificador de chat del propietario autorizado (`TELEGRAM_ALLOWED_CHAT_ID`).
 
 ---
 
