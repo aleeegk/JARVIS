@@ -1,9 +1,0 @@
-node_modules/
-build/
-# dist/ permitido para ejecucion inmediata de la app de escritorio
-!dist/**
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example

@@ -1,6 +1,0 @@
-{
-  "name": "JARVIS // CMD - Neural AI Command Center",
-  "description": "Futuristic HUD command center for AI operations, system automation, live telemetry, neural link control, and secure terminal workflows.",
-  "requestFramePermissions": ["microphone"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

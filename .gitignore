@@ -261,8 +261,15 @@ docs/**/*.md
 !config/credentials.example.json
 !settings.example.json
 !jarvis_settings.example.json
-!demos/ui_nueva/dist/
-!demos/ui_nueva/dist/**
 
-
-
+# =============================================================================
+# 14. LOCAL UI DEMOS & EXPERIMENTAL LAUNCHERS (EXCLUDED FROM REPO)
+# =============================================================================
+demos/
+demos/**
+Iniciar_Demo*.bat
+Iniciar_JARVIS_GUI*.bat
+Iniciar_JARVIS_GUI.bat
+Cambiar_GUI.bat
+cambiar_gui.py
+config/gui_config.json
