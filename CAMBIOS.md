@@ -4,6 +4,15 @@ Registro de actualizaciones oficiales y mejoras del proyecto **JARVIS — Asiste
 
 ---
 
+## [5.3.2] — 2026-09-04
+
+### 💬 Corrección de Reconocimiento de Saludos y Diálogos en JARVIS v5
+- **Mapeo Automático de Saludos:** Se añadieron remapeos inteligentes en el motor de IA para las acciones generadas espontáneamente por Ollama (`saludar`, `saludo`, `hola`, `charlar`, `hablar`, etc.) hacia la acción permitida `conversar`.
+- **Eliminación del Bloqueo "Acción no permitida":** Evita que saludos cordiales como *"hola jarvis"* sean bloqueados por el filtro estricto de seguridad de acciones del sistema operativo.
+- **Fallback Conversacional Inteligente:** Si el modelo genera un mensaje de cortesía junto con una acción no reconocida o nula, JARVIS responde de forma natural y fluida en lugar de emitir un aviso de fallo de acción.
+
+---
+
 ## [5.3.1] — 2026-09-04
 
 ### 🚀 Corrección de Arranque en Windows y Limpieza de Mensajes Ficticios en GUI 2

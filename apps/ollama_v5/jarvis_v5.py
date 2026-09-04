@@ -1823,6 +1823,16 @@ REMAPEOS_ACCIONES = {
     "tomar_captura": ("capturar_pantalla", {}),
     "sacar_captura": ("capturar_pantalla", {}),
     "captura": ("capturar_pantalla", {}),
+    "saludar": ("conversar", {}),
+    "saludo": ("conversar", {}),
+    "hola": ("conversar", {}),
+    "saludos": ("conversar", {}),
+    "charlar": ("conversar", {}),
+    "hablar": ("conversar", {}),
+    "responder": ("conversar", {}),
+    "despedirse": ("conversar", {}),
+    "agradecer": ("conversar", {}),
+    "gracias": ("conversar", {}),
 }
 
 def _construir_prompt_sistema() -> str:
@@ -2081,11 +2091,43 @@ def procesar_orden_con_ia(orden: str) -> dict:
         parametros = {}
 
     if accion not in ACCIONES_PERMITIDAS:
+        # Fallback inteligente: si era un saludo o conversación común, o la IA inventó una variante de saludar
+        orden_baja = orden.lower().strip()
+        palabras_saludo = ("hola", "buenos dias", "buenas tardes", "buenas noches", "hey", "saludos", "que tal", "como estas")
+        if any(w in orden_baja for w in palabras_saludo) or accion in ("saludo", "saludar", "saludos", "charla", "saludar_usuario"):
+            nombre_u = MEMORIA.get("usuario", {}).get("nombre", "Alejandro")
+            resp_saludo = f"¡Hola {nombre_u}! ¿En qué te puedo ayudar hoy?"
+            return {"accion": "conversar", "parametros": {"respuesta": resp_saludo}, "confianza": 0.95, "mensaje_usuario": None}
+
+        # Si la IA incluyó una respuesta de texto útil a pesar del nombre de acción no estándar
+        resp_alternativa = None
+        if isinstance(parametros, dict) and parametros.get("respuesta"):
+            resp_alternativa = parametros.get("respuesta")
+        elif mensaje:
+            resp_alternativa = mensaje
+
+        if resp_alternativa:
+            return {"accion": "conversar", "parametros": {"respuesta": resp_alternativa}, "confianza": 0.8, "mensaje_usuario": None}
+
         print(f"Jarvis: La IA sugirió la acción '{accion}' que no está permitida.")
         return {"accion": "ninguna", "parametros": {}, "confianza": 0.0, "mensaje_usuario": None}
 
     if not isinstance(parametros, dict):
         parametros = {}
+
+    # Conversión inteligente: si la acción es "ninguna" pero hay un mensaje conversacional o el usuario estaba saludando
+    if accion == "ninguna":
+        orden_baja = orden.lower().strip()
+        palabras_saludo = ("hola", "buenos dias", "buenas tardes", "buenas noches", "hey", "saludos", "que tal", "como estas")
+        if mensaje and not _es_eco_del_usuario(mensaje, orden):
+            accion = "conversar"
+            parametros = {"respuesta": mensaje}
+            mensaje = None
+        elif any(w in orden_baja for w in palabras_saludo):
+            nombre_u = MEMORIA.get("usuario", {}).get("nombre", "Alejandro")
+            accion = "conversar"
+            parametros = {"respuesta": f"¡Hola {nombre_u}! ¿En qué te puedo ayudar hoy?"}
+            mensaje = None
 
     try:
         confianza = float(confianza)
@@ -2155,6 +2197,9 @@ def ejecutar_accion(resultado: dict, orden_usuario: str):
         print(f"Jarvis: {mensaje}")
 
     if accion == "ninguna":
+        if mensaje and not _es_eco_del_usuario(mensaje, orden_usuario):
+            HISTORIAL_CONVERSACION.append({"rol": "Jarvis", "texto": mensaje})
+            return
         print("Jarvis: No puedo realizar esa acción por el momento.")
         HISTORIAL_CONVERSACION.append({"rol": "Jarvis", "texto": "No pude realizar la acción."})
         return
