@@ -4,6 +4,21 @@ Registro de actualizaciones oficiales y mejoras del proyecto **JARVIS — Asiste
 
 ---
 
+## [5.2.0] — 2026-09-04
+
+### 🎛️ Selector Dinámico de Interfaz Gráfica (GUI Switcher)
+- **Alternancia Rápida de GUIs:** Creado `cambiar_gui.py` y `Cambiar_GUI.bat` para alternar entre la GUI 1 (Clásica Stark Mark VII 3D) y la GUI 2 (Neural AI Command Center) con un solo número o comando (`python cambiar_gui.py 1|2`).
+- **Lanzador Unificado:** `Iniciar_JARVIS_GUI.bat` arranca automáticamente la interfaz actualmente activa persistida en `config/gui_config.json`.
+- **Lanzadores Directos:** `Iniciar_JARVIS_GUI1_Clasica.bat` e `Iniciar_JARVIS_GUI2_Nueva.bat`.
+
+### ⚙️ Nuevos Módulos de Automatización Local para Windows
+- **`modules/browser.py`:** Navegación web y scraping local mediante `browser-use` y `playwright` (abrir URL, búsqueda, extracción de texto y capturas de pantalla completa).
+- **`modules/desktop.py`:** Control total de ratón, teclado, atajos físicos y ventanas nativas de Windows con `pyautogui-next` y `pywinauto` (listar ventanas, enfocar por título, minimizar, cerrar y resolución).
+- **`modules/files.py`:** Detección en tiempo real de archivos seleccionados en el Explorador de Windows mediante `pywinselect`, búsqueda recursiva por patrón glob, apertura nativa y gestión segura con papelera de reciclaje (`send2trash`).
+- **`modules/automation_cli.py`:** CLI unificado para despachar comandos de browser, desktop y files desde el terminal.
+
+---
+
 ## [5.1.0] — 2026-09-04
 
 ### 🛡️ Seguridad y Blindaje del Repositorio

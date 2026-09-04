@@ -1,0 +1,19 @@
+{
+  "gui_activa": "gui1",
+  "disponibles": {
+    "gui1": {
+      "id": "gui1",
+      "nombre": "Stark Mark VII HUD (Clásica 3D)",
+      "descripcion": "Interfaz clásica con esfera 3D Three.js, partículas y telemetría de hardware.",
+      "script": "apps/ollama_v5/jarvis_app.py",
+      "cwd": "apps/ollama_v5"
+    },
+    "gui2": {
+      "id": "gui2",
+      "nombre": "Neural AI Command Center (Nueva)",
+      "descripcion": "Interfaz moderna Cyberpunk/Stark con vistas de terminal, telemetría y red.",
+      "script": "demos/ui_nueva/run_desktop.py",
+      "cwd": "demos/ui_nueva"
+    }
+  }
+}
