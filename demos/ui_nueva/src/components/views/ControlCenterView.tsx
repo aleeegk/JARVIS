@@ -67,8 +67,8 @@ export const ControlCenterView: React.FC<ControlCenterViewProps> = ({
       id: 'cleanup',
       title: 'Limpieza de temporales',
       icon: 'mop',
-      desc: 'Eliminación de caches y volcados .tar.gz',
-      action: 'Purgando archivos residuales en /tmp...',
+      desc: 'Eliminación de archivos en carpeta temporal de Windows',
+      action: 'Limpiando archivos temporales en %TEMP%...',
     },
     {
       id: 'backup',
@@ -127,7 +127,7 @@ export const ControlCenterView: React.FC<ControlCenterViewProps> = ({
     if (!isListening) {
       setIsListening(true);
       onAddLog('SYS', 'Comando de voz reconocido: "Estado del sistema".');
-      setCommandInput('Analizar los logs del servidor y verificar puertos abiertos');
+      setCommandInput('Estado del sistema y telemetría de Windows');
       setTimeout(() => {
         setIsListening(false);
       }, 2500);

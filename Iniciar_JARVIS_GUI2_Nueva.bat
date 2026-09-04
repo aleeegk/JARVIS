@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title JARVIS // CMD - GUI 2 Neural AI Command Center (Nueva)
 color 0B
 

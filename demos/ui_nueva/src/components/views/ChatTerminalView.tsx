@@ -35,10 +35,10 @@ export const ChatTerminalView: React.FC<ChatTerminalViewProps> = ({
   };
 
   const quickPrompts = [
-    'Verificar uso de memoria y estado del servidor',
-    'Escanear puertos de red y sockets activos',
-    'Analizar logs de Nginx en busca de anomalías',
-    'Programar rutina de copia de seguridad',
+    'Estado del sistema y telemetría de Windows',
+    'Ver archivos seleccionados en Explorador',
+    'Listar ventanas y aplicaciones abiertas',
+    'Capturar pantalla del escritorio',
   ];
 
   return (
@@ -280,7 +280,7 @@ export const ChatTerminalView: React.FC<ChatTerminalViewProps> = ({
               type="button"
               onClick={() => {
                 playSound('beep');
-                setInputText('Adjuntar archivo de registro de volcado: /var/log/audit.log');
+                setInputText('Analizar archivo seleccionado en Explorer');
               }}
               title="Adjuntar archivo"
               className="p-1.5 text-[#849495] hover:text-[#00f2ff] transition-colors cursor-pointer"

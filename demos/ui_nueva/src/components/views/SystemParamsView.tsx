@@ -239,7 +239,7 @@ export const SystemParamsView: React.FC<SystemParamsViewProps> = ({
               <form onSubmit={handleAddDir} className="flex gap-2 mb-2">
                 <input
                   type="text"
-                  placeholder="/var/log/..."
+                  placeholder="C:\Ruta\Directorio..."
                   value={newDirInput}
                   onChange={(e) => setNewDirInput(e.target.value)}
                   className="flex-1 bg-[#151d1e] border border-[#00f2ff] text-[#dce4e4] font-tech text-xs rounded p-2 focus:outline-none"

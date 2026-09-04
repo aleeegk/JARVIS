@@ -4,6 +4,16 @@ Registro de actualizaciones oficiales y mejoras del proyecto **JARVIS — Asiste
 
 ---
 
+## [5.3.1] — 2026-09-04
+
+### 🚀 Corrección de Arranque en Windows y Limpieza de Mensajes Ficticios en GUI 2
+- **Arranque Directo sin Errores:** Resuelto el fallo de codificación de consola en Windows (`UnicodeEncodeError: 'charmap' / cp1252`) al lanzar `Iniciar_JARVIS_GUI2_Nueva.bat`. Se configuró salida UTF-8 automática y arranque nativo con EdgeChromium en PyWebView.
+- **Eliminación de Mensajes y Logs Mock:** Eliminada la conversación ficticia de análisis de logs de Nginx y volcados `.tar.gz` que aparecía por defecto en el chat terminal.
+- **Adaptación 100% al Entorno Windows:** Limpieza total de rutas Linux (`/var/log`, `/tmp`, `/etc/shadow`, `/home/alex`), sustituidas por rutas reales de Windows (`C:\...`, `%TEMP%`) y elevación de permisos mediante UAC en vez de `sudo`.
+- **Sugerencias Rápidas Reales:** El chat ahora incluye accesos directos funcionales para consultar telemetría, ver archivos seleccionados en Explorer, listar ventanas abiertas y capturar pantalla.
+
+---
+
 ## [5.3.0] — 2026-09-04
 
 ### 🔗 Integración Real Bidireccional — GUI 2 (Neural AI Command Center) ↔ Windows

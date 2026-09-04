@@ -126,33 +126,15 @@ export const App: React.FC = () => {
   const [systemLogs, setSystemLogs] = useState<SystemLogEntry[]>([
     {
       id: 'l1',
-      timestamp: '08:34:10',
-      level: 'INFO',
-      message: 'Comando de voz reconocido: "Estado del sistema".',
+      timestamp: new Date().toLocaleTimeString('es-ES', { hour12: false }),
+      level: 'SYS',
+      message: 'Inicialización de JARVIS Core completada.',
     },
     {
       id: 'l2',
-      timestamp: '08:32:05',
-      level: 'WARN',
-      message: 'Uso de memoria superior al 80% en Ollama daemon.',
-    },
-    {
-      id: 'l3',
-      timestamp: '08:30:00',
-      level: 'SYS',
-      message: 'Resumen matutino ejecutado y enviado a Telegram.',
-    },
-    {
-      id: 'l4',
-      timestamp: '08:15:22',
-      level: 'CRIT',
-      message: 'Error 0x80070005 en acceso a /etc/shadow.',
-    },
-    {
-      id: 'l5',
-      timestamp: '08:00:00',
-      level: 'SYS',
-      message: 'Inicialización de JARVIS Core completada.',
+      timestamp: new Date().toLocaleTimeString('es-ES', { hour12: false }),
+      level: 'INFO',
+      message: 'Módulos de automatización local activos en Windows (Desktop, Files, Browser).',
     },
   ]);
 
@@ -166,45 +148,13 @@ export const App: React.FC = () => {
     setSystemLogs((prev) => [newEntry, ...prev.slice(0, 49)]);
   };
 
-  // Chat Messages (pre-populated with screenshot data)
+  // Chat Messages
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: 'm1',
-      sender: 'user',
-      timestamp: '08:34:10',
-      text: 'Analiza el log del servidor web de las últimas 24 horas y muéstrame los errores críticos. Luego, elimina los archivos temporales generados por el proceso de volcado.',
-    },
-    {
-      id: 'm2',
+      id: 'm-init',
       sender: 'jarvis',
-      timestamp: '08:34:12',
-      text: 'Análisis completado. Se han detectado 3 eventos críticos en `var/log/nginx/error.log` durante la ventana de tiempo especificada.',
-      tableData: {
-        headers: ['TIMESTAMP', 'NIVEL', 'MENSAJE'],
-        rows: [
-          {
-            time: '2023-10-27 03:14:02',
-            level: 'CRIT',
-            message: 'Worker process 4102 exited on signal 11 (SIGSEGV)',
-          },
-          {
-            time: '2023-10-27 07:45:19',
-            level: 'CRIT',
-            message: 'upstream timed out (110: Connection timed out) while connecting to upstream',
-          },
-          {
-            time: '2023-10-27 11:22:50',
-            level: 'CRIT',
-            message: 'SSL_do_handshake() failed (SSL: error:14094410:SSL routines:ssl3_read_bytes:sslv3 alert handshake failure)',
-          },
-        ],
-      },
-      fileList: [
-        { path: '/tmp/dump_20231027_01.tar.gz', size: '1.2 GB' },
-        { path: '/tmp/dump_20231027_02.tar.gz', size: '850 MB' },
-      ],
-      requiresAuth: true,
-      authConfirmed: false,
+      timestamp: new Date().toLocaleTimeString('es-ES', { hour12: false }),
+      text: 'JARVIS // CMD en línea. Sistema de automatización local conectado al entorno Windows. Escribe un comando o selecciona una acción rápida.',
     },
   ]);
 
@@ -215,50 +165,50 @@ export const App: React.FC = () => {
     {
       id: '1',
       num: '01',
-      title: 'RESUMEN MATUTINO',
+      title: 'RESUMEN DEL SISTEMA',
       status: 'ACTIVA',
       frequency: 'Diario',
       time: 'Schedule (08:00 AM)',
       triggerType: 'Schedule',
-      targetOutput: 'Telegram: @alejandro_main',
+      targetOutput: 'Telegram Bot / Panel Local',
       description:
-        'Compilación diaria de clima, agenda, commits recientes en repositorios y estado de servidores.',
+        'Compilación diaria de estado del sistema, telemetría de hardware y tareas completadas.',
     },
     {
       id: '2',
       num: '02',
       title: 'COPIA DE SEGURIDAD',
-      status: 'PAUSADA',
+      status: 'ACTIVA',
       frequency: 'Diario',
       time: 'Schedule (Daily 02:00 AM)',
       triggerType: 'Schedule',
-      targetOutput: 'S3 Bucket / Encrypted',
+      targetOutput: 'Almacenamiento Local',
       description:
-        'Backup incremental de bases de datos locales y configuraciones de seguridad del sistema.',
+        'Respaldo de memoria persistente jarvis_memoria.json y configuración local del agente.',
     },
     {
       id: '3',
       num: '03',
-      title: 'LIMPIEZA TEMPORALES',
-      status: 'ERROR',
+      title: 'LIMPIEZA DE TEMPORALES',
+      status: 'ACTIVA',
       frequency: 'Event',
-      time: 'Event (Disk > 85%)',
+      time: 'Event (Disco > 85%)',
       triggerType: 'Event',
-      targetOutput: 'System Cleaner',
+      targetOutput: 'Windows Temp Cleaner',
       description:
-        'Fallo en ejecución previa: Permiso denegado en directorio /var/cache/sys.',
+        'Purga automática de archivos temporales residuales en la carpeta %TEMP% de Windows.',
     },
     {
       id: '4',
       num: '04',
-      title: 'ESCANEO NOCTURNO',
+      title: 'AUDITORÍA DE PROCESOS',
       status: 'ACTIVA',
       frequency: 'Diario',
       time: 'Schedule (03:30 AM)',
       triggerType: 'Schedule',
-      targetOutput: 'Security Suite',
+      targetOutput: 'Monitor de Seguridad',
       description:
-        'Auditoría de integridad de archivos del sistema y análisis de puertos vulnerables en LAN.',
+        'Supervisión y registro de procesos y ventanas activas en el entorno Windows.',
     },
   ]);
 
@@ -266,59 +216,35 @@ export const App: React.FC = () => {
   const [memoryItems, setMemoryItems] = useState<MemoryItem[]>([
     {
       id: '1',
-      hexId: '0xFA12',
+      hexId: '0x00A1',
       category: 'USER_PREF',
-      title: 'Preferencias de compilación para Rust',
+      title: 'Perfil de Usuario: Alejandro',
       description:
-        'Usar siempre target linux-x86_64 con optimizaciones --release y salida de artefactos a /opt/bin.',
-      updatedAt: 'Hace 2h',
-      tags: ['#rust', '#cargo', '#binaries'],
+        'Navegador predeterminado para automatizaciones y tema visual activo en el sistema.',
+      updatedAt: 'Activo',
+      tags: ['#usuario', '#preferencias', '#windows'],
     },
     {
       id: '2',
-      hexId: '0x3B88',
-      category: 'PROJECT',
-      title: 'Ruta de workspace principal',
-      description:
-        'Directorio base de trabajo ubicado en /home/alex/projects/jarvis con permisos extendidos.',
-      updatedAt: 'Ayer',
-      tags: ['#workspace', '#directories'],
-    },
-    {
-      id: '3',
-      hexId: '0x81C2',
+      hexId: '0x00B1',
       category: 'SYSTEM_RULE',
-      title: 'Instrucciones de formato Markdown',
+      title: 'Protocolo de Ejecución Local',
       description:
-        'Formatear siempre tablas de logs con timestamp exacto, código de error en mayúsculas y badges coloreados.',
-      updatedAt: 'Hace 3 días',
-      tags: ['#markdown', '#format', '#rules'],
-    },
-    {
-      id: '4',
-      hexId: '0x99D1',
-      category: 'CONTEXT',
-      title: 'Historial de sesiones Nginx',
-      description:
-        'Último fallo registrado por desbordamiento de búfer en worker process 4102.',
-      updatedAt: 'Hoy 08:34',
-      tags: ['#nginx', '#crash', '#dump'],
+        'Automatización 100% offline sin dependencias en la nube mediante módulos nativos de Python.',
+      updatedAt: 'Activo',
+      tags: ['#protocolo', '#offline', '#automatizacion'],
     },
   ]);
 
   // Telegram Config
   const [telegramConfig, setTelegramConfig] = useState<TelegramConfig>({
-    authorizedChatId: '94827104',
-    webhookStatus: 'Conectado',
-    botToken: '7482910482:AAH9Xk2Lp08bNmQ41Zrt5vW719aKdLe-v10',
-    lastMessage: '/status',
-    lastCommand: 'Captura de pantalla enviada',
+    authorizedChatId: 'No configurado',
+    webhookStatus: 'Inactivo',
+    botToken: 'No configurado',
+    lastMessage: 'Sin mensajes recientes',
+    lastCommand: 'En espera de enlace',
     trafficLogs: [
-      '2026-08-31 08:34:10 [TG_IN] Mensaje recibido de ID 94827104: /status',
-      '2026-08-31 08:34:11 [TG_PROC] Generando informe de telemetría...',
-      '2026-08-31 08:34:12 [TG_OUT] Mensaje enviado a 94827104 (200 OK)',
-      '2026-08-31 08:34:15 [TG_IN] Comando recibido: Captura de pantalla',
-      '2026-08-31 08:34:16 [TG_OUT] Imagen PNG enviada exitosamente (4.2 MB)',
+      'Daemon de Telegram en espera de configuración en .env',
     ],
   });
 
@@ -329,12 +255,16 @@ export const App: React.FC = () => {
     voice: 'Jarvis-Esp (Masculina)',
     theme: 'Holográfico Profundo',
     language: 'Español (ES-ES)',
-    allowedDirectories: ['/home/alex/projects/jarvis', '/var/log/nginx', '/tmp/dumps'],
+    allowedDirectories: [
+      'C:\\Users\\aleja\\Documents\\JARVIS',
+      'C:\\Users\\aleja\\Downloads',
+      'C:\\Users\\aleja\\Documents',
+    ],
     authorizedApps: [
-      { id: '1', name: 'Visual Studio Code', icon: 'code' },
-      { id: '2', name: 'Brave Browser', icon: 'language' },
-      { id: '3', name: 'Docker Engine', icon: 'developer_board' },
-      { id: '4', name: 'Terminal TTY', icon: 'terminal' },
+      { id: '1', name: 'Explorador de Windows', icon: 'folder' },
+      { id: '2', name: 'Navegador Web', icon: 'language' },
+      { id: '3', name: 'PowerShell / CMD', icon: 'terminal' },
+      { id: '4', name: 'Visual Studio Code', icon: 'code' },
     ],
     requireCriticalConfirmation: true,
   });
@@ -343,102 +273,73 @@ export const App: React.FC = () => {
   const [devices, setDevices] = useState<DeviceItem[]>([
     {
       id: 'd1',
-      name: 'Neural Link Interface v2.4',
-      type: 'Neural Link',
+      name: 'Host Windows (CPU & Memoria)',
+      type: 'Compute',
       status: 'ONLINE',
-      usage: 42,
-      ip: '127.0.0.1:8088',
-      lastPing: 'Hace 2s',
+      usage: 25,
+      ip: '127.0.0.1',
+      lastPing: 'En vivo',
     },
     {
       id: 'd2',
-      name: 'Display Streamer 4K HDR',
-      type: 'Display',
+      name: 'Explorador de Archivos (pywinselect)',
+      type: 'Storage',
       status: 'ONLINE',
-      usage: 60,
-      ip: '192.168.1.105',
-      lastPing: 'Hace 5s',
+      usage: 10,
+      ip: 'WINDOWS_SHELL',
+      lastPing: 'En vivo',
     },
     {
       id: 'd3',
-      name: 'Ollama Neural Accelerator (RTX 4090)',
-      type: 'Compute',
-      status: 'BUSY',
-      usage: 78,
-      ip: '127.0.0.1:11434',
-      lastPing: 'Hace 1s',
+      name: 'Automatización GUI (pywinauto / pyautogui)',
+      type: 'Display',
+      status: 'ONLINE',
+      usage: 12,
+      ip: 'DESKTOP_HOOK',
+      lastPing: 'En vivo',
     },
     {
       id: 'd4',
-      name: 'Micrófono Array Direccional 8CH',
-      type: 'Audio',
+      name: 'Motor de Navegación (browser-use)',
+      type: 'Browser',
       status: 'ONLINE',
-      usage: 15,
-      ip: 'USB_AUDIO_01',
-      lastPing: 'Hace 10s',
-    },
-    {
-      id: 'd5',
-      name: 'Storage Array NVMe RAID-0',
-      type: 'Storage',
-      status: 'ONLINE',
-      usage: 64,
-      ip: '/dev/nvme0n1',
-      lastPing: 'Hace 1s',
+      usage: 5,
+      ip: 'CHROMIUM_PORT',
+      lastPing: 'En vivo',
     },
   ]);
 
-  // Virtual Files
+  // Virtual Files (Fallback si no hay bridge disponible)
   const [files, setFiles] = useState<VirtualFile[]>([
     {
       id: 'f1',
-      name: 'error.log',
-      path: '/var/log/nginx/error.log',
-      size: '14.2 MB',
-      type: 'log',
-      clearance: 'NIVEL 2',
-      encrypted: false,
-      modified: 'Hoy 08:34',
-    },
-    {
-      id: 'f2',
-      name: 'dump_20231027_01.tar.gz',
-      path: '/tmp/dumps/dump_20231027_01.tar.gz',
-      size: '1.2 GB',
-      type: 'archive',
-      clearance: 'NIVEL 4 RESTRICTED',
-      encrypted: true,
-      modified: 'Hoy 03:15',
-    },
-    {
-      id: 'f3',
-      name: 'dump_20231027_02.tar.gz',
-      path: '/tmp/dumps/dump_20231027_02.tar.gz',
-      size: '850 MB',
-      type: 'archive',
-      clearance: 'NIVEL 4 RESTRICTED',
-      encrypted: true,
-      modified: 'Hoy 07:46',
-    },
-    {
-      id: 'f4',
-      name: 'jarvis.config.json',
-      path: '/home/alex/projects/jarvis/config.json',
-      size: '4.8 KB',
+      name: 'Iniciar_JARVIS_GUI2_Nueva.bat',
+      path: 'c:\\Users\\aleja\\Documents\\JARVIS\\Iniciar_JARVIS_GUI2_Nueva.bat',
+      size: '1.2 KB',
       type: 'file',
       clearance: 'NIVEL 1',
       encrypted: false,
-      modified: 'Ayer',
+      modified: 'Hoy',
     },
     {
-      id: 'f5',
-      name: 'neural_weights.bin',
-      path: '/var/sys/core/neural_weights.bin',
-      size: '7.8 GB',
+      id: 'f2',
+      name: 'jarvis.py',
+      path: 'c:\\Users\\aleja\\Documents\\JARVIS\\jarvis.py',
+      size: '15.4 KB',
       type: 'file',
-      clearance: 'NIVEL 4 RESTRICTED',
-      encrypted: true,
-      modified: 'Hace 3 días',
+      clearance: 'NIVEL 1',
+      encrypted: false,
+      modified: 'Hoy',
+    },
+    {
+      id: 'f3',
+      name: 'Cambiar_GUI.bat',
+      path: 'c:\\Users\\aleja\\Documents\\JARVIS\\Cambiar_GUI.bat',
+      size: '2.5 KB',
+      type: 'file',
+      clearance: 'NIVEL 1',
+      encrypted: false,
+      modified: 'Hoy',
     },
   ]);
 
@@ -446,27 +347,11 @@ export const App: React.FC = () => {
   const [notifications, setNotifications] = useState<SystemNotification[]>([
     {
       id: 'n1',
-      title: 'Análisis de Servidor Web',
-      message: 'Se han detectado 3 errores críticos en /var/log/nginx/error.log',
-      time: '08:34 AM',
-      type: 'warn',
-      read: false,
-    },
-    {
-      id: 'n2',
-      title: 'Resumen Matutino',
-      message: 'Rutina ejecutada y enviada a Telegram con éxito.',
-      time: '08:00 AM',
+      title: 'Sistema JARVIS Iniciado',
+      message: 'GUI 2 Neural Command Center lista y conectada a Windows.',
+      time: 'Ahora',
       type: 'info',
       read: false,
-    },
-    {
-      id: 'n3',
-      title: 'Fallo de Acceso Denegado',
-      message: 'Intento de acceso a recurso protegido sin elevación sudo.',
-      time: '08:15 AM',
-      type: 'crit',
-      read: true,
     },
   ]);
 
@@ -643,10 +528,7 @@ export const App: React.FC = () => {
         m.id === messageId ? { ...m, authConfirmed: true, authRejected: false } : m
       )
     );
-    addLog('SYS', 'Autorización otorgada: Eliminación de archivos temporales completada.');
-
-    // Remove deleted files from virtual files
-    setFiles((prev) => prev.filter((f) => !f.path.includes('/tmp/dumps')));
+    addLog('SYS', 'Autorización otorgada: Acción confirmada y ejecutada.');
   };
 
   const handleRejectAuth = (messageId: string) => {
@@ -890,8 +772,8 @@ export const App: React.FC = () => {
         onCloseAccessDenied={() => setIsAccessDeniedOpen(false)}
         onRequestSudo={() => {
           setIsAccessDeniedOpen(false);
-          addLog('SYS', 'Elevación sudo autorizada para el operador Alejandro.');
-          handleExecuteCommand('sudo chmod 600 /etc/shadow && sudo systemctl restart auth');
+          addLog('SYS', 'Elevación de privilegios UAC solicitada para el operador.');
+          handleExecuteCommand('powershell Start-Process powershell -Verb runAs');
         }}
         isOllamaOffline={isOllamaOffline}
         onReconnectOllama={() => {

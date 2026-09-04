@@ -6,6 +6,17 @@ y memoria persistente.
 """
 import os
 import sys
+
+# Asegurar codificación UTF-8 en consola de Windows para evitar errores con charmap/cp1252
+if sys.platform == "win32":
+    try:
+        if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 import json
 import time
 import socket
@@ -416,12 +427,12 @@ def main():
     bridge = JarvisGUI2Bridge()
 
     print("=" * 65)
-    print("⚡ JARVIS // CMD — Neural AI Command Center (GUI 2)")
-    print("🚀 Puente nativo Python <-> React conectado exitosamente.")
+    print("[JARVIS // CMD] Neural AI Command Center (GUI 2)")
+    print("[JARVIS // CMD] Puente nativo Python <-> React conectado exitosamente.")
     print("=" * 65)
 
     window = webview.create_window(
-        title="⚡ JARVIS // CMD — Neural AI Command Center",
+        title="JARVIS // CMD — Neural AI Command Center",
         url=url,
         js_api=bridge,
         width=1360,
@@ -435,7 +446,7 @@ def main():
         background_color="#090b10"
     )
 
-    webview.start(debug=False)
+    webview.start(debug=False, gui="edgechromium")
 
 
 if __name__ == "__main__":

@@ -45,7 +45,7 @@ export const ErrorDiagnosticsModal: React.FC<ErrorDiagnosticsModalProps> = ({
             <div className="bg-[#080f10] border border-[#ffb4ab]/30 rounded-lg p-3 font-tech text-xs text-[#ffb4ab] space-y-1">
               <div>
                 <span className="text-[#849495]">Recurso:</span>{' '}
-                <code className="text-[#ffb4ab]">/etc/shadow/root_credentials.key</code>
+                <code className="text-[#ffb4ab]">C:\Windows\System32\config\SAM</code>
               </div>
               <div>
                 <span className="text-[#849495]">Excepción:</span>{' '}
@@ -71,7 +71,7 @@ export const ErrorDiagnosticsModal: React.FC<ErrorDiagnosticsModalProps> = ({
                 }}
                 className="px-5 py-2 bg-[#93000a] hover:bg-[#ff5449] text-white rounded font-tech text-xs font-bold tracking-wider shadow-[0_0_15px_rgba(147,0,10,0.5)] transition-all cursor-pointer active:scale-95"
               >
-                Solicitar Elevación (sudo)
+                Solicitar Elevación (UAC / Administrador)
               </button>
             </div>
           </div>
