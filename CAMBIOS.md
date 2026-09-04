@@ -14,9 +14,13 @@ Registro de actualizaciones oficiales y mejoras del proyecto **JARVIS — Asiste
   - `config/api_keys.example.json`
   - `config/credentials.example.json`
 
+### 💻 Demos de Interfaz de Escritorio Offline
+- **Demo UI Nueva (`Iniciar_Demo_JARVIS_UI_Nueva.bat`):** Interfaz *Neural AI Command Center* (Cyberpunk/Stark HUD) basada en React + TypeScript + Tailwind, empaquetada como app de escritorio nativa mediante `pywebview` 100% offline y desacoplada de Ollama.
+- **Demo UI Clásica (`Iniciar_Demo_JARVIS_UI_Antigua.bat`):** Interfaz holográfica Stark Mark VII HUD 3D en Three.js con Three.js embebido localmente para uso offline, telemetría ligera de hardware y respuestas simuladas explicativas sin consumo de GPU ni LLM.
+
 ### 🧹 Refactorización de Arquitectura
 - **Limpieza del Sistema:** Eliminación definitiva de módulos y dependencias de Gemini Live para enfocar el proyecto 100% en la suite autónoma local de **JARVIS v5**.
-- **Documentación:** Renovación completa del `README.md` con enfoque en el asistente local, HUD 3D holográfico y control autónomo vía Telegram.
+- **Documentación:** Renovación completa del `README.md` con enfoque en el asistente local, HUD 3D holográfico, demos de escritorio y control autónomo vía Telegram.
 
 ---
 

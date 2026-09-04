@@ -261,4 +261,8 @@ docs/**/*.md
 !config/credentials.example.json
 !settings.example.json
 !jarvis_settings.example.json
+!demos/ui_nueva/dist/
+!demos/ui_nueva/dist/**
+
+
 

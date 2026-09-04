@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS v5 — Stark Mark VII Holographic HUD</title>
+  <script src="./three.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --theme-primary: #f5a623;
+      --theme-primary-rgb: 245, 166, 35;
+      --theme-secondary: #ff7b00;
+      --theme-glow: rgba(245, 166, 35, 0.35);
+      --theme-dim: rgba(245, 166, 35, 0.12);
+      --theme-border: rgba(245, 166, 35, 0.28);
+      --bg-dark: #07080b;
+      --bg-panel: rgba(13, 16, 23, 0.82);
+      --bg-card: rgba(20, 25, 36, 0.7);
+      --bg-card-hover: rgba(30, 37, 52, 0.9);
+      --text-main: #e2e8f0;
+      --text-muted: #8b9bb4;
+      --text-dim: #4e5d78;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --font-hud: 'Orbitron', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+    body[data-theme="cyan"] {
+      --theme-primary: #00f0ff;
+      --theme-primary-rgb: 0, 240, 255;
+      --theme-secondary: #0088ff;
+      --theme-glow: rgba(0, 240, 255, 0.35);
+      --theme-dim: rgba(0, 240, 255, 0.12);
+      --theme-border: rgba(0, 240, 255, 0.28);
+    }
+    body[data-theme="violet"] {
+      --theme-primary: #c084fc;
+      --theme-primary-rgb: 192, 132, 252;
+      --theme-secondary: #9333ea;
+      --theme-glow: rgba(192, 132, 252, 0.35);
+      --theme-dim: rgba(192, 132, 252, 0.12);
+      --theme-border: rgba(192, 132, 252, 0.28);
+    }
+    body[data-theme="emerald"] {
+      --theme-primary: #10b981;
+      --theme-primary-rgb: 16, 185, 129;
+      --theme-secondary: #059669;
+      --theme-glow: rgba(16, 185, 129, 0.35);
+      --theme-dim: rgba(16, 185, 129, 0.12);
+      --theme-border: rgba(16, 185, 129, 0.28);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .grid-background {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(245, 166, 35, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245, 166, 35, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    header.hud-header {
+      position: relative;
+      z-index: 10;
+      height: 56px;
+      background: rgba(8, 10, 15, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--theme-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .brand-badge { display: flex; align-items: center; gap: 10px; }
+    .status-dot {
+      width: 10px; height: 10px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #10b981;
+      animation: pulse-dot 2s infinite ease-in-out;
+    }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.85); } }
+    .brand-title { font-family: var(--font-hud); font-size: 15px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-main); }
+    .brand-title span { color: var(--theme-primary); }
+    .model-tag {
+      background: var(--theme-dim);
+      border: 1px solid var(--theme-border);
+      color: var(--theme-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover { background: var(--bg-card-hover); color: var(--text-main); border-color: var(--theme-border); }
+    .nav-btn.active { background: var(--theme-dim); border-color: var(--theme-primary); color: var(--theme-primary); }
+    .theme-picker { display: flex; gap: 6px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); }
+    .theme-circle { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; transition: transform 0.2s; }
+    .theme-circle:hover { transform: scale(1.2); }
+    .theme-circle.gold { background: #f5a623; }
+    .theme-circle.cyan { background: #00f0ff; }
+    .theme-circle.violet { background: #c084fc; }
+    .theme-circle.emerald { background: #10b981; }
+
+    main.hud-layout {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 350px 1fr 340px;
+      gap: 14px;
+      padding: 14px 18px 10px 18px;
+      height: calc(100vh - 56px);
+      overflow: hidden;
+    }
+    .hud-left, .hud-center, .hud-right {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--theme-border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    .hologram-container {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: radial-gradient(circle at center, rgba(var(--theme-primary-rgb), 0.08) 0%, transparent 70%);
+      border-bottom: 1px solid var(--theme-border);
+    }
+    #canvas-3d { width: 100%; height: 100%; display: block; }
+    .hologram-controls {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      display: flex;
+      gap: 4px;
+    }
+    .holo-btn {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-muted);
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      transition: 0.2s;
+    }
+    .holo-btn:hover, .holo-btn.active { color: var(--theme-primary); border-color: var(--theme-primary); background: var(--theme-dim); }
+
+    .telemetry-box { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .panel-subtitle {
+      font-family: var(--font-hud);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--theme-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .metric-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); padding: 8px; text-align: center; }
+    .metric-title { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+    .metric-value { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .metric-bar { height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+    .metric-bar-fill { height: 100%; background: var(--theme-primary); width: 0%; transition: width 0.5s ease; }
+
+    .quick-actions { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+    .quick-btn {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover { background: var(--bg-card-hover); border-color: var(--theme-border); transform: translateX(3px); }
+
+    .chat-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .voice-visualizer { display: none; align-items: center; gap: 3px; height: 18px; }
+    .voice-visualizer.speaking { display: flex; }
+    .wave-bar { width: 3px; background: var(--theme-primary); border-radius: 2px; animation: soundwave 0.8s infinite ease-in-out alternate; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.3s; }
+    @keyframes soundwave { 0% { height: 4px; } 100% { height: 16px; } }
+
+    .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; user-select: text; }
+    .message-row { display: flex; gap: 10px; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .message-row.user { flex-direction: row-reverse; }
+    .avatar-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--theme-dim);
+      border: 1px solid var(--theme-border);
+      color: var(--theme-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .message-row.user .avatar-icon { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #fff; }
+    .message-bubble {
+      max-width: 82%;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-main);
+    }
+    .message-row.user .message-bubble { background: var(--theme-dim); border-color: var(--theme-border); }
+    .action-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--theme-primary);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--theme-border);
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
+
+    .input-hud-container {
+      padding: 12px 16px;
+      background: rgba(10, 12, 18, 0.9);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mic-button {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--theme-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .mic-button:hover { background: var(--theme-dim); border-color: var(--theme-primary); }
+    .text-input-field {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .text-input-field:focus { border-color: var(--theme-primary); box-shadow: 0 0 10px var(--theme-glow); }
+    .send-button {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--theme-primary);
+      border: none;
+      color: #000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .send-button:hover { background: var(--theme-secondary); }
+
+    .tabs-header { display: flex; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .tab-btn {
+      flex: 1;
+      padding: 11px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-btn.active { color: var(--theme-primary); border-bottom-color: var(--theme-primary); background: rgba(255,255,255,0.02); }
+    .tab-content { flex: 1; padding: 14px; overflow-y: auto; display: none; }
+    .tab-content.active { display: block; }
+
+    .memory-user-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 12px; }
+    .memory-item { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .memory-item:last-child { border-bottom: none; }
+    .memory-label { color: var(--text-muted); }
+    .memory-val { color: var(--theme-primary); font-family: var(--font-mono); font-weight: 500; }
+    .tasks-list { display: flex; flex-direction: column; gap: 8px; }
+    .task-entry { background: var(--bg-card); border-left: 3px solid var(--theme-primary); padding: 8px 10px; border-radius: 4px; font-size: 11.5px; }
+    .task-time { font-size: 10px; color: var(--text-dim); margin-top: 3px; font-family: var(--font-mono); }
+
+    .settings-group { margin-bottom: 14px; }
+    .setting-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .hud-select {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #e2e8f0;
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      outline: none;
+    }
+    .hud-select optgroup {
+      background: #141923;
+      color: var(--theme-primary);
+      font-weight: bold;
+    }
+    .hud-select option {
+      background: #0f131a;
+      color: #fff;
+      font-weight: normal;
+      padding: 4px;
+    }
+    .hud-slider { width: 100%; accent-color: var(--theme-primary); cursor: pointer; }
+    .test-voice-btn { width: 100%; background: var(--bg-card); border: 1px solid var(--theme-border); color: var(--theme-primary); padding: 9px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; margin-top: 6px; font-weight: 600; }
+    .test-voice-btn:hover { background: var(--theme-dim); }
+    .mic-diagnostic-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 10px; font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+
+    .toast-alert {
+      position: fixed;
+      bottom: 75px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(18, 22, 32, 0.95);
+      border: 1px solid var(--theme-primary);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .toast-alert.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body data-theme="gold">
+  <div class="grid-background"></div>
+
+  <header class="hud-header">
+    <div class="header-left">
+      <div class="brand-badge">
+        <div class="status-dot"></div>
+        <div class="brand-title">JARVIS <span>v5</span> // AI CORE</div>
+      </div>
+      <div class="model-tag" id="model-tag">
+        <span style="font-size:8px">●</span> qwen2.5vl:7b
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="nav-btn" id="voice-toggle-btn" title="Activar/Silenciar Voz">
+        <span id="speaker-icon">🔊</span> Voz: <strong id="voice-status-text">Activa</strong>
+      </button>
+
+      <div class="theme-picker" title="Cambiar Tema de Color">
+        <div class="theme-circle gold" onclick="setTheme('gold')"></div>
+        <div class="theme-circle cyan" onclick="setTheme('cyan')"></div>
+        <div class="theme-circle violet" onclick="setTheme('violet')"></div>
+        <div class="theme-circle emerald" onclick="setTheme('emerald')"></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="hud-layout">
+    <section class="hud-left">
+      <div class="hologram-container">
+        <canvas id="canvas-3d"></canvas>
+        <div class="hologram-controls">
+          <button class="holo-btn active" id="btn-auto-rotate">ROTAR</button>
+          <button class="holo-btn" id="btn-pulse">PULSO</button>
+          <button class="holo-btn" id="btn-reset-cam">RESET</button>
+        </div>
+      </div>
+
+      <div class="telemetry-box">
+        <div class="panel-subtitle">
+          <span>TELEMETRÍA EN VIVO</span>
+          <span id="ollama-status-badge" style="color:#10b981; font-size:10px;">OLLAMA ONLINE</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-title">CPU</div>
+            <div class="metric-value" id="cpu-val">0%</div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="cpu-bar"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">RAM</div>
+            <div class="metric-value" id="ram-val">0%</div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="ram-bar"></div></div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">DISCO (C:)</div>
+            <div class="metric-value" id="disk-val">0%</div>
+            <div class="metric-bar"><div class="metric-bar-fill" id="disk-bar"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <div class="panel-subtitle">ACCIONES DIRECTAS</div>
+        <button class="quick-btn" onclick="sendQuickCommand('Ver y analizar lo que hay en mi pantalla actual')">
+          <span>👁️</span> Analizar Pantalla (Visión)
+        </button>
+        <button class="quick-btn" onclick="sendQuickCommand('Abre YouTube y busca música lofi relajante')">
+          <span>🎵</span> Música en YouTube
+        </button>
+        <button class="quick-btn" onclick="sendQuickCommand('Abre mi navegador favorito')">
+          <span>🌐</span> Iniciar Navegador
+        </button>
+        <button class="quick-btn" onclick="sendQuickCommand('Abre la carpeta Descargas')">
+          <span>📁</span> Abrir Descargas
+        </button>
+      </div>
+    </section>
+
+    <section class="hud-center">
+      <div class="chat-header">
+        <div style="font-family: var(--font-hud); font-size: 11px; color: var(--theme-primary); letter-spacing: 1px;">
+          TERMINAL DE INTERACCIÓN AUTÓNOMA
+        </div>
+        <div class="voice-visualizer" id="audio-waveforms">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chat-stream">
+        <div class="message-row jarvis">
+          <div class="avatar-icon">J</div>
+          <div class="message-bubble">
+            Hola, Alejandro. Soy <strong>JARVIS v5</strong> con visión multimodal (Qwen2.5-VL) y síntesis neuronal de voz. Estoy listo para asistirte en cualquier tarea.
+          </div>
+        </div>
+      </div>
+
+      <div class="input-hud-container">
+        <button class="mic-button" id="mic-btn" title="Hablar por micrófono">
+          🎙️
+        </button>
+        <input type="text" id="user-input" class="text-input-field" placeholder="Escribe una orden para JARVIS... (ej: 'abre youtube', 'ver pantalla')" autocomplete="off" />
+        <button class="send-button" id="send-btn" title="Enviar orden">
+          ➤
+        </button>
+      </div>
+    </section>
+
+    <section class="hud-right">
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('tab-memory', event)">🧠 Memoria</button>
+        <button class="tab-btn" onclick="switchTab('tab-voice', event)">⚙️ Voz y Ajustes</button>
+      </div>
+
+      <div class="tab-content active" id="tab-memory">
+        <div class="memory-user-card">
+          <div class="panel-subtitle" style="margin-bottom:6px">PERFIL ACTIVO</div>
+          <div class="memory-item">
+            <span class="memory-label">Usuario:</span>
+            <span class="memory-val" id="mem-user-name">Alejandro</span>
+          </div>
+          <div class="memory-item">
+            <span class="memory-label">Navegador:</span>
+            <span class="memory-val" id="mem-user-browser">Opera</span>
+          </div>
+        </div>
+
+        <div class="panel-subtitle">HISTORIAL DE TAREAS RECIENTES</div>
+        <div class="tasks-list" id="tasks-container">
+          <div style="font-size:11px; color:var(--text-dim)">Cargando tareas guardadas...</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-voice">
+        <div class="settings-group">
+          <div class="setting-label">
+            <span>Motor y Voz de JARVIS</span>
+          </div>
+          <select class="hud-select" id="voice-select">
+            <optgroup label="👑 KOKORO AI (100% Offline)">
+              <option value="kokoro:bm_george" selected>👑 JARVIS Oficial (Kokoro AI - Offline)</option>
+              <option value="kokoro:bm_lewis">🇬🇧 Mayordomo Británico (Kokoro AI - Offline)</option>
+              <option value="kokoro:am_adam">🇺🇸 Adam AI (Kokoro AI - Offline)</option>
+              <option value="kokoro:af_bella">👩 Bella AI (Kokoro AI - Offline)</option>
+            </optgroup>
+            <optgroup label="⚡ PIPER TTS (100% Offline Rápido)">
+              <option value="piper:es_ES-sharvard-medium">🇪🇸 Sharvard Español (Piper - Offline)</option>
+              <option value="piper:es_ES-carlfm-x_low">🇪🇸 Carlos Español (Piper - Offline)</option>
+              <option value="piper:en_GB-alan-medium">🇬🇧 Alan Butler (Piper - Offline)</option>
+            </optgroup>
+            <optgroup label="🌐 EDGE-TTS (Online Neural HD)">
+              <option value="edge:es-ES-AlvaroNeural">🇪🇸 Álvaro Neural HD (Edge-TTS - Online)</option>
+              <option value="edge:es-ES-ElviraNeural">🇪🇸 Elvira Neural HD (Edge-TTS - Online)</option>
+              <option value="edge:es-MX-JorgeNeural">🇲🇽 Jorge Neural HD (Edge-TTS - Online)</option>
+              <option value="edge:en-GB-RyanNeural">🇬🇧 Ryan JARVIS HD (Edge-TTS - Online)</option>
+            </optgroup>
+            <optgroup label="💻 VOCES DEL SISTEMA WINDOWS" id="group-win-voices">
+              <option value="win:default">💻 Voz predeterminada de Windows</option>
+            </optgroup>
+          </select>
+          <button class="test-voice-btn" onclick="testCurrentVoice()">🔊 Probar Voz Seleccionada</button>
+        </div>
+
+        <div class="settings-group">
+          <div class="setting-label">
+            <span>Velocidad de Habla</span>
+            <span id="rate-val-display">1.00x</span>
+          </div>
+          <input type="range" class="hud-slider" id="rate-slider" min="0.7" max="1.4" step="0.05" value="1.0">
+        </div>
+
+        <div class="settings-group">
+          <div class="panel-subtitle" style="margin-top:10px">ESTADO DEL MICRÓFONO</div>
+          <div class="mic-diagnostic-card" id="mic-status-info">
+            Detectando dispositivo de entrada de Windows...
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast-alert" id="toast">Notificación</div>
+
+  <script>
+    let currentTheme = 'gold';
+    let isVoiceActive = true;
+    let selectedVoiceId = 'kokoro:bm_george';
+    let speechRate = 1.0;
+    let isSpeaking = false;
+    let audioDeviceAvailable = false;
+    let windowsVoices = [];
+
+    const chatStream = document.getElementById('chat-stream');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const micBtn = document.getElementById('mic-btn');
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+    const voiceStatusText = document.getElementById('voice-status-text');
+    const speakerIcon = document.getElementById('speaker-icon');
+    const voiceSelect = document.getElementById('voice-select');
+    const groupWinVoices = document.getElementById('group-win-voices');
+    const rateSlider = document.getElementById('rate-slider');
+    const rateValDisplay = document.getElementById('rate-val-display');
+    const audioWaveforms = document.getElementById('audio-waveforms');
+    const toast = document.getElementById('toast');
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.body.setAttribute('data-theme', theme);
+      update3DColor();
+      saveUserSettings();
+    }
+
+    function showToast(msg, duration = 3000) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), duration);
+    }
+
+    function switchTab(tabId, ev) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      if (ev && ev.target) ev.target.classList.add('active');
+      const targetTab = document.getElementById(tabId);
+      if (targetTab) targetTab.classList.add('active');
+    }
+
+    function loadWindowsVoices() {
+      if ('speechSynthesis' in window) {
+        windowsVoices = window.speechSynthesis.getVoices();
+        if (windowsVoices.length > 0) {
+          groupWinVoices.innerHTML = '';
+          windowsVoices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = 'win:' + v.name;
+            const flag = v.lang.startsWith('es') ? '🇪🇸 ' : (v.lang.startsWith('en') ? '🇬🇧 ' : '🌐 ');
+            opt.textContent = `${flag}${v.name} (${v.lang})`;
+            groupWinVoices.appendChild(opt);
+          });
+        }
+      }
+    }
+
+    function initVoiceOptions() {
+      loadWindowsVoices();
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadWindowsVoices;
+      }
+
+      voiceSelect.addEventListener('change', (e) => {
+        selectedVoiceId = e.target.value;
+        saveUserSettings();
+        showToast('Voz: ' + e.target.options[e.target.selectedIndex].text);
+      });
+
+      rateSlider.addEventListener('input', (e) => {
+        speechRate = parseFloat(e.target.value);
+        rateValDisplay.textContent = speechRate.toFixed(2) + 'x';
+        saveUserSettings();
+      });
+
+      voiceToggleBtn.addEventListener('click', () => {
+        isVoiceActive = !isVoiceActive;
+        if (isVoiceActive) {
+          voiceStatusText.textContent = 'Activa';
+          speakerIcon.textContent = '🔊';
+          voiceToggleBtn.classList.remove('active');
+          showToast('Voz de JARVIS activada.');
+        } else {
+          stopSpeaking();
+          voiceStatusText.textContent = 'Mute';
+          speakerIcon.textContent = '🔇';
+          voiceToggleBtn.classList.add('active');
+          showToast('Voz de JARVIS silenciada.');
+        }
+        saveUserSettings();
+      });
+    }
+
+    function speakText(text) {
+      if (!isVoiceActive || !text) return;
+
+      isSpeaking = true;
+      audioWaveforms.classList.add('speaking');
+
+      // Si es una voz de Windows nativa (SAPI5)
+      if (selectedVoiceId.startsWith('win:')) {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const winVoiceName = selectedVoiceId.replace('win:', '');
+          const utterance = new SpeechSynthesisUtterance(text);
+          const found = windowsVoices.find(v => v.name === winVoiceName);
+          if (found) utterance.voice = found;
+          utterance.rate = speechRate;
+          utterance.onend = () => { isSpeaking = false; audioWaveforms.classList.remove('speaking'); };
+          utterance.onerror = () => { isSpeaking = false; audioWaveforms.classList.remove('speaking'); };
+          window.speechSynthesis.speak(utterance);
+        }
+      } else {
+        // Motor Python TTS (Kokoro, Piper, Edge-TTS)
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.speak) {
+          window.pywebview.api.speak(text, selectedVoiceId, speechRate);
+          setTimeout(() => {
+            isSpeaking = false;
+            audioWaveforms.classList.remove('speaking');
+          }, Math.max(2500, text.length * 75));
+        }
+      }
+    }
+
+    function stopSpeaking() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.stop_speaking) {
+        window.pywebview.api.stop_speaking();
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      isSpeaking = false;
+      audioWaveforms.classList.remove('speaking');
+    }
+
+    function testCurrentVoice() {
+      const isEnglish = selectedVoiceId.includes('kokoro') || selectedVoiceId.includes('en_GB') || selectedVoiceId.includes('en-GB') || selectedVoiceId.includes('en-');
+      const testMsg = isEnglish ? "Hello Alejandro. I am JARVIS. All systems are functioning at peak efficiency." : "Hola Alejandro, soy JARVIS. Esta es una prueba de mi sintetizador de voz.";
+      speakText(testMsg);
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (!audioDeviceAvailable) {
+        showToast('⚠️ No se detectó micrófono activo en Windows. Conecta tus auriculares para hablar.');
+      } else {
+        showToast('🎙️ Dispositivo de entrada listo. Puedes dictar tu orden.');
+      }
+    });
+
+    function saveUserSettings() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.save_settings) {
+        window.pywebview.api.save_settings({
+          theme: currentTheme,
+          voice_id: selectedVoiceId,
+          voice_rate: speechRate,
+          auto_speak: isVoiceActive
+        });
+      }
+    }
+
+    function appendMessage(sender, text, action = null) {
+      const row = document.createElement('div');
+      row.className = `message-row ${sender}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar-icon';
+      avatar.textContent = sender === 'user' ? 'A' : 'J';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      if (action && action !== 'conversar' && action !== 'ninguna') {
+        const badge = document.createElement('div');
+        badge.className = 'action-badge';
+        badge.textContent = `⚡ ACCIÓN: ${action}`;
+        bubble.appendChild(badge);
+      }
+
+      const content = document.createElement('div');
+      content.textContent = text;
+      bubble.appendChild(content);
+
+      row.appendChild(avatar);
+      row.appendChild(bubble);
+      chatStream.appendChild(row);
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    function sendCommand(text) {
+      if (!text || !text.trim()) return;
+
+      appendMessage('user', text);
+      userInput.value = '';
+
+      const loadingRow = document.createElement('div');
+      loadingRow.className = 'message-row jarvis loading';
+      loadingRow.innerHTML = `
+        <div class="avatar-icon">J</div>
+        <div class="message-bubble" style="color:var(--theme-primary); font-family:var(--font-mono); font-size:12px;">
+          Procesando orden con qwen2.5vl:7b...
+        </div>
+      `;
+      chatStream.appendChild(loadingRow);
+      chatStream.scrollTop = chatStream.scrollHeight;
+
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.send_message) {
+        window.pywebview.api.send_message(text).then(res => {
+          loadingRow.remove();
+          if (res && res.respuesta) {
+            appendMessage('jarvis', res.respuesta, res.accion);
+            speakText(res.respuesta);
+            refreshMemory();
+          } else {
+            appendMessage('jarvis', 'No se obtuvo respuesta del motor.');
+          }
+        }).catch(err => {
+          loadingRow.remove();
+          appendMessage('jarvis', 'Error de comunicación: ' + err);
+        });
+      } else {
+        setTimeout(() => {
+          loadingRow.remove();
+          const mockMsg = `Entendido: '${text}'. El motor de IA local procesó la orden.`;
+          appendMessage('jarvis', mockMsg);
+          speakText(mockMsg);
+        }, 500);
+      }
+    }
+
+    function sendQuickCommand(cmd) {
+      sendCommand(cmd);
+    }
+
+    sendBtn.addEventListener('click', () => sendCommand(userInput.value));
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendCommand(userInput.value);
+    });
+
+    function refreshMemory() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_memory) {
+        window.pywebview.api.get_memory().then(mem => {
+          if (mem) {
+            if (mem.usuario) {
+              document.getElementById('mem-user-name').textContent = mem.usuario.nombre || 'Alejandro';
+              document.getElementById('mem-user-browser').textContent = mem.usuario.navegador_favorito || 'Opera';
+            }
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = '';
+            if (mem.ultimas_tareas && mem.ultimas_tareas.length > 0) {
+              mem.ultimas_tareas.slice(0, 15).forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'task-entry';
+                div.innerHTML = `
+                  <strong>${t.accion}</strong>
+                  <div style="color:var(--text-muted); margin-top:2px;">"${t.orden}"</div>
+                  <div class="task-time">${t.fecha || ''}</div>
+                `;
+                container.appendChild(div);
+              });
+            } else {
+              container.innerHTML = '<div style="font-size:11px; color:var(--text-dim)">Sin tareas registradas aún.</div>';
+            }
+          }
+        });
+      }
+    }
+
+    function updateTelemetry() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_telemetry) {
+        window.pywebview.api.get_telemetry().then(data => {
+          if (data && data.success) {
+            document.getElementById('cpu-val').textContent = `${data.cpu}%`;
+            document.getElementById('cpu-bar').style.width = `${data.cpu}%`;
+            document.getElementById('ram-val').textContent = `${data.ram}%`;
+            document.getElementById('ram-bar').style.width = `${data.ram}%`;
+            document.getElementById('disk-val').textContent = `${data.disk}%`;
+            document.getElementById('disk-bar').style.width = `${data.disk}%`;
+          }
+        });
+      }
+    }
+
+    function checkAudioDevices() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.get_audio_devices) {
+        window.pywebview.api.get_audio_devices().then(res => {
+          const micInfo = document.getElementById('mic-status-info');
+          if (res && res.has_mic) {
+            audioDeviceAvailable = true;
+            micInfo.innerHTML = `<span style="color:#10b981">● DISPOSITIVO CONECTADO</span><br><strong>${res.default_mic}</strong>`;
+          } else {
+            audioDeviceAvailable = false;
+            micInfo.innerHTML = `<span style="color:#f59e0b">● NO SE DETECTA MICRÓFONO</span><br>Conecta tus auriculares o micrófono para habilitar la entrada de voz.`;
+          }
+        });
+      }
+    }
+
+    let scene, camera, renderer, sphereMesh, ring1, ring2, particles;
+    let autoRotate = true;
+    let isPulse = false;
+
+    function init3D() {
+      const container = document.querySelector('.hologram-container');
+      const canvas = document.getElementById('canvas-3d');
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.z = 24;
+
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+
+      const themeColor = getComputedStyle(document.body).getPropertyValue('--theme-primary').trim() || '#f5a623';
+
+      const geoSphere = new THREE.IcosahedronGeometry(7, 3);
+      const matSphere = new THREE.MeshBasicMaterial({ color: new THREE.Color(themeColor), wireframe: true, transparent: true, opacity: 0.45 });
+      sphereMesh = new THREE.Mesh(geoSphere, matSphere);
+      scene.add(sphereMesh);
+
+      const geoRing1 = new THREE.TorusGeometry(10, 0.08, 16, 100);
+      const matRing1 = new THREE.MeshBasicMaterial({ color: new THREE.Color(themeColor), transparent: true, opacity: 0.6 });
+      ring1 = new THREE.Mesh(geoRing1, matRing1);
+      ring1.rotation.x = Math.PI / 3;
+      scene.add(ring1);
+
+      const geoRing2 = new THREE.TorusGeometry(12, 0.06, 16, 100);
+      const matRing2 = new THREE.MeshBasicMaterial({ color: new THREE.Color(themeColor), transparent: true, opacity: 0.35 });
+      ring2 = new THREE.Mesh(geoRing2, matRing2);
+      ring2.rotation.y = Math.PI / 4;
+      scene.add(ring2);
+
+      const partCount = 200;
+      const partGeo = new THREE.BufferGeometry();
+      const posArray = new Float32Array(partCount * 3);
+      for (let i = 0; i < partCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 35;
+      }
+      partGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const partMat = new THREE.PointsMaterial({ size: 0.15, color: new THREE.Color(themeColor), transparent: true, opacity: 0.6 });
+      particles = new THREE.Points(partGeo, partMat);
+      scene.add(particles);
+
+      window.addEventListener('resize', onWindowResize);
+
+      document.getElementById('btn-auto-rotate').addEventListener('click', (e) => {
+        autoRotate = !autoRotate;
+        e.target.classList.toggle('active', autoRotate);
+      });
+      document.getElementById('btn-pulse').addEventListener('click', (e) => {
+        isPulse = !isPulse;
+        e.target.classList.toggle('active', isPulse);
+      });
+      document.getElementById('btn-reset-cam').addEventListener('click', () => {
+        camera.position.set(0, 0, 24);
+        sphereMesh.rotation.set(0, 0, 0);
+      });
+
+      animate3D();
+    }
+
+    function update3DColor() {
+      if (!sphereMesh) return;
+      const themeColor = getComputedStyle(document.body).getPropertyValue('--theme-primary').trim();
+      const threeColor = new THREE.Color(themeColor);
+      sphereMesh.material.color = threeColor;
+      ring1.material.color = threeColor;
+      ring2.material.color = threeColor;
+      particles.material.color = threeColor;
+    }
+
+    function onWindowResize() {
+      const container = document.querySelector('.hologram-container');
+      if (!container || !renderer) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    let clock = new THREE.Clock();
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      const elapsedTime = clock.getElapsedTime();
+
+      if (autoRotate) {
+        sphereMesh.rotation.y += 0.006;
+        sphereMesh.rotation.x += 0.003;
+        ring1.rotation.z += 0.008;
+        ring2.rotation.x += 0.005;
+        particles.rotation.y += 0.001;
+      }
+
+      if (isSpeaking || isPulse) {
+        const scale = 1 + Math.sin(elapsedTime * 8) * 0.08;
+        sphereMesh.scale.set(scale, scale, scale);
+      } else {
+        sphereMesh.scale.set(1, 1, 1);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function initAll() {
+      init3D();
+      initVoiceOptions();
+      refreshMemory();
+      updateTelemetry();
+      checkAudioDevices();
+      setInterval(updateTelemetry, 2500);
+      setInterval(checkAudioDevices, 10000);
+    }
+
+    window.addEventListener('DOMContentLoaded', initAll);
+    window.addEventListener('pywebviewready', () => {
+      refreshMemory();
+      updateTelemetry();
+      checkAudioDevices();
+    });
+  </script>
+</body>
+</html>

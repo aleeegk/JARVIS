@@ -42,11 +42,17 @@ JARVIS/
 │   ├── credentials.example.json  # Plantilla para credenciales OAuth de Google
 │   └── jarvis.ico                # Ícono oficial del sistema
 │
+├── 📂 demos/                     # Demos de interfaz de escritorio 100% offline
+│   ├── 📂 ui_nueva/              # Neural AI Command Center (Cyberpunk/Stark HUD)
+│   └── 📂 ui_antigua/            # Stark Mark VII HUD clásico con Three.js
+│
 ├── 📂 tests_and_demos/           # Scripts de prueba y prototipos
 │   ├── ejemplo_youtube_vision.py # Demo de visión multimodal en YouTube
 │   └── holograma-esfera-ia.html  # Prototipo independiente de la esfera 3D
 │
-├── 🚀 Iniciar_JARVIS_Ollama_GUI.bat     # Inicia la interfaz 3D Holográfica (Ollama)
+├── 🚀 Iniciar_Demo_JARVIS_UI_Nueva.bat   # Lanza la demo de la nueva UI (Escritorio offline)
+├── 🚀 Iniciar_Demo_JARVIS_UI_Antigua.bat # Lanza la demo de la UI clásica (Escritorio offline)
+├── 🚀 Iniciar_JARVIS_Ollama_GUI.bat     # Inicia la interfaz 3D completa (con Ollama)
 ├── 🚀 Iniciar_JARVIS_Ollama_Consola.bat # Inicia JARVIS v5 en consola de texto
 ├── 🚀 Iniciar_JARVIS_Telegram.bat       # Inicia el daemon de control por Telegram
 ├── .env.example                         # Plantilla de variables de entorno
@@ -93,7 +99,9 @@ Inicia JARVIS haciendo doble clic en cualquiera de sus accesos directos:
 
 | Acceso Directo | Modo | Descripción |
 | :--- | :--- | :--- |
-| **`Iniciar_JARVIS_Ollama_GUI.bat`** | **GUI Holográfica 3D** | Interfaz completa Stark Mark VII HUD con Three.js, voz y visión. |
+| **`Iniciar_Demo_JARVIS_UI_Nueva.bat`** | **Demo UI Nueva (Escritorio)** | *Neural AI Command Center* (Cyberpunk/Stark HUD) offline sin llamadas a Ollama. |
+| **`Iniciar_Demo_JARVIS_UI_Antigua.bat`** | **Demo UI Clásica (Escritorio)** | Interfaz holográfica Stark Mark VII 3D Three.js offline sin llamadas a Ollama. |
+| **`Iniciar_JARVIS_Ollama_GUI.bat`** | **GUI Completa con Ollama** | Interfaz completa conectada al modelo local `qwen2.5vl:7b`, voz y visión. |
 | **`Iniciar_JARVIS_Ollama_Consola.bat`** | **Consola Local** | Ejecución ligera por terminal para comandos directos con Ollama. |
 | **`Iniciar_JARVIS_Telegram.bat`** | **Daemon Telegram** | Control remoto 100% en segundo plano vía bot de Telegram. |
 
