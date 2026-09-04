@@ -26,6 +26,7 @@ import { SystemParamsView } from './components/views/SystemParamsView';
 import { FilesView } from './components/views/FilesView';
 import { DevicesView } from './components/views/DevicesView';
 import { AnalyticsView } from './components/views/AnalyticsView';
+import { jarvisBridge, isBridgeAvailable } from './services/jarvisBridge';
 
 // Modals
 import { NeuralLinkModal } from './components/modals/NeuralLinkModal';
@@ -52,6 +53,10 @@ export const App: React.FC = () => {
   const [isAccessDeniedOpen, setIsAccessDeniedOpen] = useState(false);
   const [isOllamaOffline, setIsOllamaOffline] = useState(false);
 
+  // Real Windows Environment State
+  const [openWindows, setOpenWindows] = useState<Array<{ hwnd?: number; titulo: string; proceso?: string }>>([]);
+  const [currentFolder, setCurrentFolder] = useState<string>('project');
+
   // Live Telemetry
   const [telemetry, setTelemetry] = useState<TelemetryData>({
     cpu: 18,
@@ -65,22 +70,56 @@ export const App: React.FC = () => {
     tokensPerSec: 68,
   });
 
-  // Telemetry fluctuation loop
+  // Telemetry loop: real hardware metrics via psutil / PyWebView bridge
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTelemetry((prev) => ({
-        ...prev,
-        cpu: Math.min(95, Math.max(12, prev.cpu + (Math.random() * 8 - 4))),
-        ram: Math.min(85, Math.max(38, prev.ram + (Math.random() * 2 - 1))),
-        gpu: Math.min(90, Math.max(20, prev.gpu + (Math.random() * 6 - 3))),
-        vram: Math.min(80, Math.max(22, prev.vram + (Math.random() * 2 - 1))),
-        temp: Math.min(75, Math.max(42, prev.temp + (Math.random() * 2 - 1))),
-        latencyMs: Math.max(8, Math.round(12 + Math.random() * 6)),
-        tokensPerSec: Math.max(40, Math.round(65 + Math.random() * 15)),
-      }));
-    }, 2000);
+    let isMounted = true;
 
-    return () => clearInterval(interval);
+    const fetchTelemetry = async () => {
+      try {
+        const real = await jarvisBridge.getTelemetry();
+        if (real && isMounted) {
+          setTelemetry((prev) => ({
+            ...prev,
+            cpu: real.cpu ?? prev.cpu,
+            ram: real.ram ?? prev.ram,
+            gpu: real.gpu ?? prev.gpu,
+            vram: real.vram ?? prev.vram,
+            battery: real.battery ?? prev.battery,
+            disk: real.disk ?? prev.disk,
+            temp: real.temp ?? prev.temp,
+            latencyMs: real.latencyMs ?? prev.latencyMs,
+            tokensPerSec: real.tokensPerSec ?? prev.tokensPerSec,
+          }));
+
+          if (typeof real.ollamaOnline === 'boolean') {
+            setIsOllamaOffline(!real.ollamaOnline);
+          }
+          return;
+        }
+      } catch (err) {
+        // bridge not available or fallback
+      }
+
+      if (isMounted) {
+        setTelemetry((prev) => ({
+          ...prev,
+          cpu: Math.min(95, Math.max(12, prev.cpu + (Math.random() * 8 - 4))),
+          ram: Math.min(85, Math.max(38, prev.ram + (Math.random() * 2 - 1))),
+          gpu: Math.min(90, Math.max(20, prev.gpu + (Math.random() * 6 - 3))),
+          vram: Math.min(80, Math.max(22, prev.vram + (Math.random() * 2 - 1))),
+          temp: Math.min(75, Math.max(42, prev.temp + (Math.random() * 2 - 1))),
+          latencyMs: Math.max(8, Math.round(12 + Math.random() * 6)),
+          tokensPerSec: Math.max(40, Math.round(65 + Math.random() * 15)),
+        }));
+      }
+    };
+
+    fetchTelemetry();
+    const interval = setInterval(fetchTelemetry, 2000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   // System Logs
@@ -431,11 +470,103 @@ export const App: React.FC = () => {
     },
   ]);
 
-  // Command Execution Handler
-  const handleExecuteCommand = (cmdText: string) => {
-    addLog('INFO', `Comando ingresado: "${cmdText}"`);
+  // Carga inicial de datos reales desde el núcleo de JARVIS
+  useEffect(() => {
+    const initRealData = async () => {
+      try {
+        // 1. Cargar memoria persistente real (jarvis_memoria.json)
+        const realMem = await jarvisBridge.getMemory();
+        if (realMem && realMem.length > 0) {
+          setMemoryItems(realMem);
+        }
 
-    // Add user message to chat
+        // 2. Cargar archivos reales del directorio de proyecto
+        const realFiles = await jarvisBridge.getRealFiles('project');
+        if (realFiles && realFiles.length > 0) {
+          setFiles(realFiles);
+        }
+
+        // 3. Cargar configuración real de Telegram
+        const realTg = await jarvisBridge.getTelegramConfig();
+        if (realTg) {
+          setTelegramConfig((prev) => ({ ...prev, ...realTg }));
+        }
+
+        // 4. Cargar ventanas reales abiertas en Windows (pywinauto)
+        const realWins = await jarvisBridge.getOpenWindows();
+        if (realWins && realWins.length > 0) {
+          setOpenWindows(realWins);
+        }
+
+        addLog('SYS', 'Conexión bidireccional PyWebView <-> JARVIS Core activa.');
+      } catch (err) {
+        console.warn('Ejecutando en entorno desacoplado:', err);
+      }
+    };
+
+    initRealData();
+  }, []);
+
+  // Handlers para archivos y explorador
+  const handleChangeFolder = async (folder: string) => {
+    setCurrentFolder(folder);
+    addLog('SYS', `Explorando directorio: ${folder.toUpperCase()}`);
+    try {
+      const realFiles = await jarvisBridge.getRealFiles(folder);
+      if (realFiles && realFiles.length > 0) {
+        setFiles(realFiles);
+      }
+    } catch (err) {
+      console.error('Error cambiando carpeta:', err);
+    }
+  };
+
+  const handleDetectExplorerSelection = async (): Promise<string[]> => {
+    try {
+      const selected = await jarvisBridge.getExplorerSelected();
+      if (selected && selected.length > 0) {
+        addLog('SYS', `pywinselect detectó ${selected.length} archivo(s) en Explorer.`);
+        return selected;
+      } else {
+        addLog('INFO', 'pywinselect: No hay archivos seleccionados en Windows Explorer.');
+      }
+    } catch (err) {
+      console.error('Error detectando archivos en Explorer:', err);
+    }
+    return [];
+  };
+
+  const handleAskAboutFiles = (paths: string[]) => {
+    const query = `Analiza los siguientes archivos seleccionados en Windows Explorer:\n${paths.join('\n')}`;
+    handleExecuteCommand(query);
+  };
+
+  const handleFocusWindow = async (title: string) => {
+    addLog('SYS', `Enfocando ventana: ${title}`);
+    try {
+      await jarvisBridge.focusWindow(title);
+    } catch (err) {
+      console.error('Error enfocando ventana:', err);
+    }
+  };
+
+  const handleRefreshDevices = async () => {
+    addLog('SYS', 'Escaneando ventanas y procesos de Windows (pywinauto)...');
+    try {
+      const realWins = await jarvisBridge.getOpenWindows();
+      if (realWins && realWins.length > 0) {
+        setOpenWindows(realWins);
+      }
+    } catch (err) {
+      console.error('Error refrescando ventanas:', err);
+    }
+  };
+
+  // Command Execution Handler conectado con JARVIS Bridge
+  const handleExecuteCommand = async (cmdText: string) => {
+    addLog('INFO', `Comando: "${cmdText}"`);
+
+    // Mensaje de usuario al chat
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -446,6 +577,28 @@ export const App: React.FC = () => {
     setCurrentView('chat');
     setIsChatProcessing(true);
 
+    try {
+      const res = await jarvisBridge.sendMessage(cmdText);
+      if (res && res.respuesta) {
+        setIsChatProcessing(false);
+        playSound('confirm');
+
+        const jarvisMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          sender: 'jarvis',
+          timestamp: res.timestamp || new Date().toLocaleTimeString('es-ES', { hour12: false }),
+          text: res.respuesta,
+        };
+
+        setMessages((prev) => [...prev, jarvisMsg]);
+        addLog('SYS', `Acción ejecutada: [${res.accion}] (${res.modo || 'local'})`);
+        return;
+      }
+    } catch (err) {
+      console.error('Error procesando comando vía bridge:', err);
+    }
+
+    // Fallback si PyWebView no está conectado (modo preview en navegador estándar)
     setTimeout(() => {
       setIsChatProcessing(false);
       playSound('confirm');
@@ -472,7 +625,7 @@ export const App: React.FC = () => {
 
       setMessages((prev) => [...prev, jarvisMsg]);
       addLog('SYS', `Respuesta generada para: "${cmdText}"`);
-    }, 1200);
+    }, 1000);
   };
 
   // Trigger quick action from dashboard cards
@@ -684,12 +837,16 @@ export const App: React.FC = () => {
         {currentView === 'files' && (
           <FilesView
             files={files}
+            currentFolder={currentFolder}
+            onChangeFolder={handleChangeFolder}
+            onDetectExplorerSelection={handleDetectExplorerSelection}
+            onAskAboutFiles={handleAskAboutFiles}
             onOpenFile={(file) => {
               addLog('INFO', `Visualizando archivo: ${file.path}`);
             }}
             onDeleteFile={(fileId) => {
               setFiles((prev) => prev.filter((f) => f.id !== fileId));
-              addLog('WARN', `Archivo eliminado de sandbox.`);
+              addLog('WARN', `Archivo eliminado de la vista.`);
             }}
           />
         )}
@@ -697,6 +854,7 @@ export const App: React.FC = () => {
         {currentView === 'devices' && (
           <DevicesView
             devices={devices}
+            openWindows={openWindows}
             onToggleDevice={(deviceId) => {
               setDevices((prev) =>
                 prev.map((d) =>
@@ -707,9 +865,8 @@ export const App: React.FC = () => {
               );
               addLog('SYS', `Estado de dispositivo [${deviceId}] modificado.`);
             }}
-            onRefreshDevices={() => {
-              addLog('SYS', 'Escaneo de bus de dispositivos completado.');
-            }}
+            onRefreshDevices={handleRefreshDevices}
+            onFocusWindow={handleFocusWindow}
           />
         )}
 

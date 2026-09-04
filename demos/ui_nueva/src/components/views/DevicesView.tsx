@@ -2,16 +2,26 @@ import React, { useState } from 'react';
 import { DeviceItem } from '../../types';
 import { playSound } from '../../utils/audio';
 
+export interface OpenWindowItem {
+  hwnd?: number;
+  titulo: string;
+  proceso?: string;
+}
+
 interface DevicesViewProps {
   devices: DeviceItem[];
+  openWindows?: OpenWindowItem[];
   onToggleDevice: (deviceId: string) => void;
   onRefreshDevices: () => void;
+  onFocusWindow?: (title: string) => void;
 }
 
 export const DevicesView: React.FC<DevicesViewProps> = ({
   devices,
+  openWindows = [],
   onToggleDevice,
   onRefreshDevices,
+  onFocusWindow,
 }) => {
   const [isScanning, setIsScanning] = useState(false);
 
@@ -155,6 +165,58 @@ export const DevicesView: React.FC<DevicesViewProps> = ({
             </div>
           );
         })}
+      </div>
+
+      {/* Real Windows Applications Section (pywinauto) */}
+      <div className="glass-panel p-6 rounded-xl space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#3a494b]/40 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[#00f2ff] text-xl">desktop_windows</span>
+            <h2 className="font-headline font-bold text-lg text-[#00f2ff] tracking-tight">
+              VENTANAS Y APLICACIONES ACTIVAS EN WINDOWS
+            </h2>
+          </div>
+          <span className="font-tech text-xs bg-[#151d1e] text-[#74f5ff] px-3 py-1 rounded border border-[#3a494b]/50">
+            NATIVO // pywinauto ({openWindows.length} detectadas)
+          </span>
+        </div>
+
+        {openWindows.length === 0 ? (
+          <p className="font-tech text-xs text-[#849495] italic">
+            No se han detectado ventanas activas en segundo plano o el sistema está en modo simulación.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
+            {openWindows.slice(0, 12).map((win, idx) => (
+              <div
+                key={win.hwnd || idx}
+                className="bg-[#080f10]/80 border border-[#3a494b]/40 p-3 rounded-lg flex items-center justify-between gap-3 hover:border-[#00f2ff]/60 transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="font-tech text-xs font-semibold text-[#dce4e4] truncate">
+                    {win.titulo || 'Ventana sin título'}
+                  </p>
+                  {win.proceso && (
+                    <span className="font-mono text-[10px] text-[#849495]">
+                      Proceso: {win.proceso} {win.hwnd ? `(HWND: ${win.hwnd})` : ''}
+                    </span>
+                  )}
+                </div>
+                {onFocusWindow && (
+                  <button
+                    onClick={() => {
+                      playSound('click');
+                      onFocusWindow(win.titulo);
+                    }}
+                    className="px-2.5 py-1 bg-[#00f2ff]/10 hover:bg-[#00f2ff]/20 text-[#00f2ff] border border-[#00f2ff]/40 rounded font-tech text-[11px] font-bold cursor-pointer whitespace-nowrap transition-colors"
+                  >
+                    TRAER AL FRENTE
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,20 @@ Registro de actualizaciones oficiales y mejoras del proyecto **JARVIS — Asiste
 
 ---
 
+## [5.3.0] — 2026-09-04
+
+### 🔗 Integración Real Bidireccional — GUI 2 (Neural AI Command Center) ↔ Windows
+- **Puente Nativo Python ↔ React:** `JarvisGUI2Bridge` en `run_desktop.py` conecta el frontend React/TypeScript directamente al sistema operativo Windows en tiempo real mediante `pywebview.js_api`.
+- **Telemetría de Hardware en Vivo:** CPU %, RAM %, Disco `C:\` y estado de batería real obtenidos con `psutil`, actualizados cada 2 segundos en el panel de control.
+- **Chat y Comandos Reales:** Los comandos escritos en el terminal del HUD ejecutan acciones reales sobre Windows (capturas de pantalla, apertura de navegador, detección de archivos en Explorer, listar ventanas activas) sin necesidad de Ollama ni consumo de GPU.
+- **Explorador de Archivos Nativo:** Se pueden navegar carpetas reales del proyecto, Descargas y Documentos de Windows directamente desde la GUI.
+- **Detección pywinselect:** Botón en el explorador que captura en tiempo real los archivos seleccionados en el Explorador de Windows y permite procesarlos con JARVIS.
+- **Ventanas y Aplicaciones Activas:** Panel de aplicaciones abiertas en Windows (vía `pywinauto` + fallback `psutil`) con acción "Traer al frente" para enfocar cualquier ventana desde la GUI.
+- **Memoria Persistente Real:** La sección Memory Bank carga datos reales desde `jarvis_memoria.json` (perfil del usuario, recuerdos e historial de tareas).
+- **Configuración de Telegram Real:** Lectura segura del token (parcialmente enmascarado) y chat ID desde los archivos de configuración locales.
+
+---
+
 ## [5.2.0] — 2026-09-04
 
 ### 🎛️ Selector Dinámico de Interfaz Gráfica (GUI Switcher)

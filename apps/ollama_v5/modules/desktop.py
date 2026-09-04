@@ -128,7 +128,8 @@ class DesktopController:
                             "ancho": rect.width(),
                             "alto": rect.height()
                         })
-                return ventanas
+                if ventanas:
+                    return ventanas
             except Exception:
                 pass
 
@@ -146,6 +147,39 @@ class DesktopController:
                     })
         except Exception:
             pass
+
+        # Fallback con psutil para listar aplicaciones de usuario activas si no hay ventanas visibles en la sesión
+        if not ventanas:
+            try:
+                import psutil
+                known_apps = {
+                    'code.exe': 'Visual Studio Code',
+                    'chrome.exe': 'Google Chrome',
+                    'opera.exe': 'Opera Browser',
+                    'msedge.exe': 'Microsoft Edge',
+                    'explorer.exe': 'Windows Explorer',
+                    'spotify.exe': 'Spotify',
+                    'discord.exe': 'Discord',
+                    'antigravity ide.exe': 'Antigravity IDE',
+                    'cmd.exe': 'Terminal Windows',
+                    'powershell.exe': 'PowerShell',
+                    'notepad.exe': 'Bloc de Notas',
+                    'taskmgr.exe': 'Administrador de Tareas'
+                }
+                seen = set()
+                for p in psutil.process_iter(['name', 'pid']):
+                    pname = (p.info.get('name') or '').lower()
+                    if pname in known_apps and pname not in seen:
+                        seen.add(pname)
+                        ventanas.append({
+                            "titulo": known_apps[pname],
+                            "proceso": p.info['name'],
+                            "hwnd": p.info['pid'],
+                            "control_type": "Window",
+                            "x": 0, "y": 0, "ancho": 1280, "alto": 720
+                        })
+            except Exception:
+                pass
 
         return ventanas
 

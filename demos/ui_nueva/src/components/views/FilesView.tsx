@@ -6,11 +6,36 @@ interface FilesViewProps {
   files: VirtualFile[];
   onOpenFile: (file: VirtualFile) => void;
   onDeleteFile: (fileId: string) => void;
+  currentFolder?: string;
+  onChangeFolder?: (folder: string) => void;
+  onDetectExplorerSelection?: () => Promise<string[]>;
+  onAskAboutFiles?: (paths: string[]) => void;
 }
 
-export const FilesView: React.FC<FilesViewProps> = ({ files, onOpenFile, onDeleteFile }) => {
+export const FilesView: React.FC<FilesViewProps> = ({
+  files,
+  onOpenFile,
+  onDeleteFile,
+  currentFolder = 'project',
+  onChangeFolder,
+  onDetectExplorerSelection,
+  onAskAboutFiles,
+}) => {
   const [search, setSearch] = useState('');
   const [selectedFile, setSelectedFile] = useState<VirtualFile | null>(null);
+  const [detectedPaths, setDetectedPaths] = useState<string[]>([]);
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  const handleDetectSelection = async () => {
+    playSound('scan');
+    setIsDetecting(true);
+    if (onDetectExplorerSelection) {
+      const paths = await onDetectExplorerSelection();
+      setDetectedPaths(paths || []);
+      playSound('confirm');
+    }
+    setIsDetecting(false);
+  };
 
   const filtered = files.filter(
     (f) =>
@@ -28,15 +53,86 @@ export const FilesView: React.FC<FilesViewProps> = ({ files, onOpenFile, onDelet
             EXPLORADOR DE ARCHIVOS
           </h1>
           <p className="font-body text-sm text-[#b9cacb] mt-1">
-            Sistema de archivos sandbox y directorios seguros autorizados con cifrado cuántico.
+            Archivos reales del sistema de archivos Windows y captura en vivo del Explorador vía pywinselect.
           </p>
         </div>
 
         <div className="flex items-center gap-2 font-tech text-xs bg-[#151d1e] px-3 py-1.5 rounded border border-[#3a494b]/60">
-          <span className="text-[#849495]">SANDBOX:</span>
-          <span className="text-[#00f2ff] font-bold">AISLADO // RO/RW SEGURO</span>
+          <span className="text-[#849495]">ESTADO:</span>
+          <span className="text-[#00f2ff] font-bold">CONECTADO // NATIVO WINDOWS</span>
         </div>
       </div>
+
+      {/* Real Folder Selector & PyWinSelect Detection Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#0c1214] p-3 rounded-lg border border-[#3a494b]/50">
+        <div className="flex items-center gap-2">
+          <span className="font-tech text-xs text-[#849495]">DIRECTORIO:</span>
+          <button
+            onClick={() => onChangeFolder && onChangeFolder('project')}
+            className={`px-3 py-1.5 rounded font-tech text-xs cursor-pointer transition-all ${
+              currentFolder === 'project'
+                ? 'bg-[#00f2ff] text-[#002022] font-bold shadow-[0_0_10px_rgba(0,242,255,0.4)]'
+                : 'bg-[#151d1e] text-[#b9cacb] hover:text-[#00f2ff] border border-[#3a494b]/40'
+            }`}
+          >
+            PROYECTO JARVIS
+          </button>
+          <button
+            onClick={() => onChangeFolder && onChangeFolder('downloads')}
+            className={`px-3 py-1.5 rounded font-tech text-xs cursor-pointer transition-all ${
+              currentFolder === 'downloads'
+                ? 'bg-[#00f2ff] text-[#002022] font-bold shadow-[0_0_10px_rgba(0,242,255,0.4)]'
+                : 'bg-[#151d1e] text-[#b9cacb] hover:text-[#00f2ff] border border-[#3a494b]/40'
+            }`}
+          >
+            DESCARGAS
+          </button>
+          <button
+            onClick={() => onChangeFolder && onChangeFolder('documents')}
+            className={`px-3 py-1.5 rounded font-tech text-xs cursor-pointer transition-all ${
+              currentFolder === 'documents'
+                ? 'bg-[#00f2ff] text-[#002022] font-bold shadow-[0_0_10px_rgba(0,242,255,0.4)]'
+                : 'bg-[#151d1e] text-[#b9cacb] hover:text-[#00f2ff] border border-[#3a494b]/40'
+            }`}
+          >
+            DOCUMENTOS
+          </button>
+        </div>
+
+        <button
+          onClick={handleDetectSelection}
+          disabled={isDetecting}
+          className="bg-[#00f2ff]/15 hover:bg-[#00f2ff]/25 border border-[#00f2ff]/60 text-[#00f2ff] px-3.5 py-1.5 rounded font-tech text-xs font-bold flex items-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50 shadow-[0_0_12px_rgba(0,242,255,0.2)]"
+        >
+          <span className={`material-symbols-outlined text-[16px] ${isDetecting ? 'animate-spin' : ''}`}>
+            touch_app
+          </span>
+          <span>{isDetecting ? 'DETECTANDO...' : 'DETECTAR SELECCIÓN EN EXPLORER (pywinselect)'}</span>
+        </button>
+      </div>
+
+      {/* Banner de archivos seleccionados con pywinselect */}
+      {detectedPaths.length > 0 && (
+        <div className="bg-[#00f2ff]/10 border border-[#00f2ff]/50 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3 animate-fade-in">
+          <div className="space-y-1">
+            <div className="font-tech text-xs text-[#00f2ff] font-bold flex items-center gap-2">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>{detectedPaths.length} ARCHIVO(S) SELECCIONADO(S) EN WINDOWS EXPLORER:</span>
+            </div>
+            <ul className="text-xs font-mono text-[#dce4e4] space-y-0.5 max-h-24 overflow-y-auto">
+              {detectedPaths.map((p, idx) => (
+                <li key={idx} className="truncate">• {p}</li>
+              ))}
+            </ul>
+          </div>
+          <button
+            onClick={() => onAskAboutFiles && onAskAboutFiles(detectedPaths)}
+            className="bg-[#00f2ff] hover:bg-[#74f5ff] text-[#002022] font-tech text-xs font-bold px-3.5 py-2 rounded cursor-pointer whitespace-nowrap shadow-[0_0_12px_rgba(0,242,255,0.4)]"
+          >
+            PROCESAR CON JARVIS ⚡
+          </button>
+        </div>
+      )}
 
       {/* Search and stats */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
@@ -54,9 +150,9 @@ export const FilesView: React.FC<FilesViewProps> = ({ files, onOpenFile, onDelet
         </div>
 
         <div className="font-tech text-xs text-[#849495] flex items-center gap-3">
-          <span>Total Archivos: {files.length}</span>
+          <span>Archivos en vista: {filtered.length}</span>
           <span>•</span>
-          <span className="text-[#00f2ff]">Espacio Utilizado: 3.4 GB</span>
+          <span className="text-[#00f2ff]">Explorador Conectado</span>
         </div>
       </div>
 
