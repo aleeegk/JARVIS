@@ -1,0 +1,14 @@
+---
+description: Protocolo JARVIS — IG antes de editar, handoff en docs, comentarios en cambios
+alwaysApply: true
+---
+
+# Handoff entre agentes (JARVIS)
+
+Antes de cualquier implementación: entrega un implementation guide y espera “procede”. Sin aprobación, no edites.
+
+Al terminar la sesión o si se acaban los tokens: actualiza `docs/CAMBIOS.md` (entrada nueva arriba). Reglas completas: `docs/regla_agents.md`.
+
+Cada cambio de código: comentario en las líneas tocadas para el siguiente agente (por qué, no lo obvio).
+
+Código de producto: `apps/ollama_v5/` o `apps/gemini_live/`; no mezclar motores. No commits salvo que el usuario lo pida.

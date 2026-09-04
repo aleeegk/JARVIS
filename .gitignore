@@ -1,0 +1,264 @@
+# =============================================================================
+# JARVIS AI ASSISTANT - SECURE .GITIGNORE
+# Comprehensive Git ignore rules for Windows PC Automation & Multi-AI Stack
+# Stack: Python 3.11+, PowerShell, Node.js, Local Models, OAuth & APIs
+# =============================================================================
+
+# =============================================================================
+# 1. SECRETS, CREDENTIALS & SENSITIVE KEYS (CRITICAL - NEVER COMMIT)
+# =============================================================================
+# Environment variables and configuration secrets
+.env
+.env.*
+*.env
+config/.env
+config/.env.*
+*.env.local
+*.env.production
+*.env.development
+
+# API keys, tokens, OAuth client secrets & session state
+*api_key*
+*api_keys*.json
+config/api_keys.json
+credentials.json
+*credentials*.json
+config/credentials.json
+modules/credentials.json
+client_secret*.json
+google_credentials*.json
+service_account*.json
+token.json
+tokens.json
+*token*.json
+token.pickle
+*token*.pickle
+modules/token.json
+*.session
+*.session-journal
+
+# SSL/TLS certificates, private/public keys, and authentication bundles
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+*.csr
+*.pub
+certs/
+config/certs/
+id_rsa*
+id_ed25519*
+
+# =============================================================================
+# 2. LOCAL AI MODELS, WEIGHTS & LARGE BINARIES (>100MB)
+# =============================================================================
+# Large Language & Vision model formats (GGUF, PyTorch, ONNX, Safetensors, etc.)
+*.gguf
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.ckpt
+*.tflite
+*.h5
+*.model
+*.weights
+*.pkl
+*.pickle
+*.joblib
+
+# Dedicated model directories and voice caches
+models/
+models_tts/
+apps/ollama_v5/models_tts/
+voice_models/
+whisper_models/
+weights/
+checkpoints/
+
+# =============================================================================
+# 3. USER DATA, RUNTIME STATE & PERSISTENT MEMORY
+# =============================================================================
+# Assistant dynamic memories and user-specific persistent states
+long_term.json
+apps/gemini_live/memory/long_term.json
+jarvis_memoria.json
+apps/ollama_v5/jarvis_memoria.json
+jarvis_settings.json
+apps/ollama_v5/jarvis_settings.json
+*memoria*.json
+*settings*.json
+
+# =============================================================================
+# 4. DATABASES & STORAGE ENGINES
+# =============================================================================
+# SQLite and relational database files & transaction journals
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# =============================================================================
+# 5. LOGS, CACHES, SCREENSHOTS & RUNTIME CAPTURES
+# =============================================================================
+# Application and runtime logs
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temporary files and media captures (screen captures, audio recordings, OCR/vision buffers)
+*.tmp
+*.temp
+temp/
+tmp/
+capturas/
+screenshots/
+recordings/
+audio_cache/
+*.wav
+*.mp3
+*.ogg
+*.m4a
+*.raw
+
+# =============================================================================
+# 6. PYTHON ARTIFACTS & BYTECODE
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.manifest
+*.spec
+
+# =============================================================================
+# 7. PYTHON VIRTUAL ENVIRONMENTS
+# =============================================================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env/
+env*/
+venv*/
+
+# =============================================================================
+# 8. TESTING, COVERAGE & CODE QUALITY
+# =============================================================================
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+
+# =============================================================================
+# 9. NODE.JS & JAVASCRIPT UTILITIES
+# =============================================================================
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# =============================================================================
+# 10. OPERATING SYSTEM FILES
+# =============================================================================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+
+# =============================================================================
+# 11. IDES, EDITORS & AI ASSISTANT WORKSPACES
+# =============================================================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.idea/
+*.swp
+*.swo
+.history/
+.aider*
+
+# =============================================================================
+# 12. INTERNAL DOCUMENTATION & AI AGENT INSTRUCTIONS
+# =============================================================================
+# Exclude internal AI instructions, agent handoff notes, and architecture guides
+docs/
+docs/**/*.md
+
+# =============================================================================
+# 13. ALLOWLIST: TEMPLATES & EXAMPLE CONFIGURATIONS
+# =============================================================================
+# Explicitly keep example configuration files tracked for setup and deployment
+!.env.example
+!.env.*.example
+!*.example
+!config.example.json
+!config/config.example.json
+!api_keys.example.json
+!config/api_keys.example.json
+!credentials.example.json
+!config/credentials.example.json
+!settings.example.json
+!jarvis_settings.example.json
+

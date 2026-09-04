@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Holograma Esférico Interactivo</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, #0a0a0c 0%, #000000 70%);
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+  #scene-container {
+    width: 100vw;
+    height: 100vh;
+    cursor: grab;
+  }
+  #scene-container:active {
+    cursor: grabbing;
+  }
+  #hud {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: #ffcf4a;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.65;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(255, 200, 60, 0.6);
+    line-height: 1.6;
+  }
+  #hud .dim { opacity: 0.5; font-size: 10px; }
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .ctrl-btn {
+    background: rgba(255, 200, 60, 0.08);
+    border: 1px solid rgba(255, 200, 60, 0.4);
+    color: #ffcf4a;
+    padding: 8px 16px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+  .ctrl-btn:hover {
+    background: rgba(255, 200, 60, 0.2);
+    box-shadow: 0 0 15px rgba(255, 200, 60, 0.4);
+  }
+  .ctrl-btn.active {
+    background: rgba(255, 200, 60, 0.3);
+  }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  AI CORE // STATUS: ONLINE<br>
+  <span class="dim">ARRASTRA PARA ROTAR · SCROLL PARA ZOOM</span>
+</div>
+
+<div id="scene-container"></div>
+
+<div id="controls">
+  <button class="ctrl-btn active" id="btn-auto">Auto-rotar</button>
+  <button class="ctrl-btn" id="btn-pulse">Pulso</button>
+  <button class="ctrl-btn" id="btn-color">Color</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  const container = document.getElementById('scene-container');
+
+  // --- Escena base ---
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 6.5;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  container.appendChild(renderer.domElement);
+
+  // Grupo raíz que contiene todo el holograma (para rotarlo como conjunto)
+  const holo = new THREE.Group();
+  scene.add(holo);
+
+  // Paleta de colores intercambiables
+  const palettes = [
+    { core: 0xffd35c, mid: 0xffb020, glow: 0xfff2c0 }, // dorado (JARVIS-like)
+    { core: 0x4ad1ff, mid: 0x0090ff, glow: 0xbfeaff }, // azul cian
+    { core: 0xff5c8a, mid: 0xff2050, glow: 0xffc0d8 }  // rojo/rosa
+  ];
+  let paletteIndex = 0;
+  let currentPalette = palettes[paletteIndex];
+
+  // --- 1. Núcleo esférico wireframe (varias capas concéntricas) ---
+  const wireGroup = new THREE.Group();
+  holo.add(wireGroup);
+
+  function buildWireLayer(radius, detail, opacity) {
+    const geo = new THREE.IcosahedronGeometry(radius, detail);
+    const mat = new THREE.MeshBasicMaterial({
+      color: currentPalette.mid,
+      wireframe: true,
+      transparent: true,
+      opacity: opacity
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.userData.speed = (Math.random() - 0.5) * 0.002;
+    wireGroup.add(mesh);
+    return mesh;
+  }
+  const wireLayers = [
+    buildWireLayer(2.0, 2, 0.35),
+    buildWireLayer(1.7, 1, 0.25),
+    buildWireLayer(2.3, 1, 0.15)
+  ];
+
+  // --- 2. Nube de partículas de datos distribuidas en la esfera ---
+  const PARTICLE_COUNT = 3200;
+  const particleGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(PARTICLE_COUNT * 3);
+  const basePositions = new Float32Array(PARTICLE_COUNT * 3);
+  const randomOffsets = new Float32Array(PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // Distribución esférica con algo de ruido radial (aspecto "de datos")
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = Math.random() * Math.PI * 2;
+    const r = 2.0 + (Math.random() - 0.5) * 0.6;
+
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.sin(phi) * Math.sin(theta);
+    const z = r * Math.cos(phi);
+
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+
+    basePositions[i * 3] = x;
+    basePositions[i * 3 + 1] = y;
+    basePositions[i * 3 + 2] = z;
+
+    randomOffsets[i] = Math.random() * Math.PI * 2;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+  const particleMat = new THREE.PointsMaterial({
+    color: currentPalette.glow,
+    size: 0.028,
+    transparent: true,
+    opacity: 0.85,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const particles = new THREE.Points(particleGeo, particleMat);
+  holo.add(particles);
+
+  // --- 3. Anillos orbitales tipo "HUD" ---
+  const rings = [];
+  function buildRing(radius, tiltX, tiltY, opacity, segments) {
+    const curve = new THREE.EllipseCurve(0, 0, radius, radius, 0, Math.PI * 2 * 0.82, false, 0);
+    const points = curve.getPoints(segments);
+    const geo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, p.y, 0)));
+    const mat = new THREE.LineBasicMaterial({
+      color: currentPalette.core,
+      transparent: true,
+      opacity: opacity
+    });
+    const ring = new THREE.Line(geo, mat);
+    ring.rotation.x = tiltX;
+    ring.rotation.y = tiltY;
+    ring.userData.speed = (Math.random() - 0.5) * 0.01 + 0.003;
+    holo.add(ring);
+    rings.push(ring);
+    return ring;
+  }
+  buildRing(2.6, Math.PI / 2.3, 0.3, 0.5, 128);
+  buildRing(2.8, Math.PI / 1.7, 1.1, 0.35, 128);
+  buildRing(2.45, 0.4, Math.PI / 2.6, 0.4, 96);
+
+  // --- 4. Núcleo central brillante ---
+  const coreGeo = new THREE.SphereGeometry(0.35, 32, 32);
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: currentPalette.glow,
+    transparent: true,
+    opacity: 0.9
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  holo.add(core);
+
+  // Halo suave alrededor del núcleo (sprite con gradiente radial)
+  function makeGlowTexture() {
+    const size = 256;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.25, 'rgba(255,220,140,0.7)');
+    gradient.addColorStop(1, 'rgba(255,200,60,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    return new THREE.CanvasTexture(canvas);
+  }
+  const glowTexture = makeGlowTexture();
+  const glowMat = new THREE.SpriteMaterial({
+    map: glowTexture,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const glowSprite = new THREE.Sprite(glowMat);
+  glowSprite.scale.set(2.2, 2.2, 1);
+  holo.add(glowSprite);
+
+  // --- Interacción: arrastrar para rotar, scroll para zoom ---
+  let isDragging = false;
+  let prevMouse = { x: 0, y: 0 };
+  let rotationVelocity = { x: 0, y: 0.0025 };
+  let autoRotate = true;
+
+  container.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    autoRotate = false;
+    document.getElementById('btn-auto').classList.remove('active');
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - prevMouse.x;
+    const dy = e.clientY - prevMouse.y;
+    rotationVelocity.y = dx * 0.0025;
+    rotationVelocity.x = dy * 0.0025;
+    holo.rotation.y += dx * 0.005;
+    holo.rotation.x += dy * 0.005;
+    prevMouse = { x: e.clientX, y: e.clientY };
+  });
+
+  // Touch support
+  container.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    autoRotate = false;
+    document.getElementById('btn-auto').classList.remove('active');
+    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+  window.addEventListener('touchend', () => { isDragging = false; });
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - prevMouse.x;
+    const dy = e.touches[0].clientY - prevMouse.y;
+    holo.rotation.y += dx * 0.005;
+    holo.rotation.x += dy * 0.005;
+    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+
+  container.addEventListener('wheel', (e) => {
+    camera.position.z += e.deltaY * 0.003;
+    camera.position.z = Math.max(3.5, Math.min(12, camera.position.z));
+  }, { passive: true });
+
+  // --- Botones de control ---
+  const btnAuto = document.getElementById('btn-auto');
+  btnAuto.addEventListener('click', () => {
+    autoRotate = !autoRotate;
+    btnAuto.classList.toggle('active', autoRotate);
+  });
+
+  let pulseActive = false;
+  const btnPulse = document.getElementById('btn-pulse');
+  btnPulse.addEventListener('click', () => {
+    pulseActive = !pulseActive;
+    btnPulse.classList.toggle('active', pulseActive);
+  });
+
+  const btnColor = document.getElementById('btn-color');
+  btnColor.addEventListener('click', () => {
+    paletteIndex = (paletteIndex + 1) % palettes.length;
+    currentPalette = palettes[paletteIndex];
+    wireLayers.forEach(m => m.material.color.setHex(currentPalette.mid));
+    particleMat.color.setHex(currentPalette.glow);
+    rings.forEach(r => r.material.color.setHex(currentPalette.core));
+    coreMat.color.setHex(currentPalette.glow);
+  });
+
+  // --- Loop de animación ---
+  const clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    if (autoRotate) {
+      holo.rotation.y += 0.0028;
+      holo.rotation.x = Math.sin(t * 0.15) * 0.08;
+    }
+
+    // Capas wireframe girando a distintas velocidades (efecto "engranaje de datos")
+    wireLayers.forEach((mesh, i) => {
+      mesh.rotation.y += mesh.userData.speed + 0.0008 * (i + 1);
+      mesh.rotation.x += mesh.userData.speed * 0.5;
+    });
+
+    // Anillos orbitales
+    rings.forEach((ring, i) => {
+      ring.rotation.z += ring.userData.speed * 0.15;
+    });
+
+    // Vibración sutil de partículas (parpadeo tipo datos en movimiento)
+    const posAttr = particleGeo.attributes.position;
+    const scale = pulseActive ? 1 + Math.sin(t * 3) * 0.06 : 1;
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const idx = i * 3;
+      const jitter = Math.sin(t * 2 + randomOffsets[i]) * 0.015;
+      posAttr.array[idx] = basePositions[idx] * scale + jitter;
+      posAttr.array[idx + 1] = basePositions[idx + 1] * scale + jitter;
+      posAttr.array[idx + 2] = basePositions[idx + 2] * scale + jitter;
+    }
+    posAttr.needsUpdate = true;
+
+    // Pulso del núcleo
+    const coreScale = pulseActive ? 1 + Math.sin(t * 4) * 0.25 : 1 + Math.sin(t * 1.5) * 0.08;
+    core.scale.set(coreScale, coreScale, coreScale);
+    glowSprite.scale.set(2.2 * coreScale, 2.2 * coreScale, 1);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // --- Resize ---
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+</body>
+</html>
