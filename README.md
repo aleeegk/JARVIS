@@ -44,24 +44,13 @@ JARVIS/
 │           └── musica.py         # Automatización de reproducción multimedia
 │
 ├── 📂 config/                    # Plantillas de configuración y recursos
-│   ├── gui_config.json           # Configuración de GUI activa (gui1 / gui2)
 │   ├── api_keys.example.json     # Plantilla para configuración de claves
 │   ├── credentials.example.json  # Plantilla para credenciales OAuth de Google
 │   └── jarvis.ico                # Ícono oficial del sistema
 │
-├── 📂 demos/                     # Demos de interfaz de escritorio 100% offline
-│   ├── 📂 ui_nueva/              # Neural AI Command Center (Cyberpunk/Stark HUD)
-│   └── 📂 ui_antigua/            # Stark Mark VII HUD clásico con Three.js
-│
-├── 🚀 Cambiar_GUI.bat                   # Selector interactivo de interfaz gráfica
-├── 🚀 Iniciar_JARVIS_GUI.bat            # Lanza la GUI actualmente activa
-├── 🚀 Iniciar_JARVIS_GUI1_Clasica.bat   # Lanza directamente la GUI 1 (Clásica 3D)
-├── 🚀 Iniciar_JARVIS_GUI2_Nueva.bat     # Lanza directamente la GUI 2 (Nueva Command Center)
-├── 🚀 Iniciar_Demo_JARVIS_UI_Nueva.bat   # Lanza la demo de la nueva UI (Offline)
-├── 🚀 Iniciar_Demo_JARVIS_UI_Antigua.bat # Lanza la demo de la UI clásica (Offline)
+├── 🚀 Iniciar_JARVIS_Ollama_GUI.bat     # Inicia la interfaz gráfica oficial (Stark Mark VII HUD)
 ├── 🚀 Iniciar_JARVIS_Ollama_Consola.bat # Inicia JARVIS v5 en consola de texto
 ├── 🚀 Iniciar_JARVIS_Telegram.bat       # Inicia el daemon de control por Telegram
-├── cambiar_gui.py                       # Script CLI para alternar entre GUIs
 ├── .env.example                         # Plantilla de variables de entorno
 ├── .gitignore                           # Blindaje de seguridad y exclusiones
 ├── CAMBIOS.md                           # Historial público de cambios
@@ -100,27 +89,14 @@ pip install -r requirements.txt
 
 ---
 
-## 🎮 Alternancia de GUIs y Modos de Ejecución
+## 🎮 Modos de Ejecución
 
-JARVIS incluye un **Selector Dinámico de GUI** para alternar con un solo clic o comando entre la interfaz clásica y la nueva:
-
-### Selector Rápido de GUI:
-- **Doble clic en `Cambiar_GUI.bat`** o ejecuta:
-  ```bash
-  python cambiar_gui.py 1   # Activa la GUI 1 (Clásica Stark Mark VII 3D)
-  python cambiar_gui.py 2   # Activa la GUI 2 (Neural AI Command Center)
-  ```
-
-### Tabla de Accesos Directos:
+JARVIS ofrece acceso directo a sus modos operativos mediante scripts de inicio rápido:
 
 | Acceso Directo | Modo | Descripción |
 | :--- | :--- | :--- |
-| **`Cambiar_GUI.bat`** | **Selector de GUI** | Menú interactivo en consola para elegir y activar GUI 1 o GUI 2. |
-| **`Iniciar_JARVIS_GUI.bat`** | **GUI Activa** | Inicia automáticamente la interfaz configurada actualmente. |
-| **`Iniciar_JARVIS_GUI1_Clasica.bat`** | **GUI 1 Directa** | Abre directamente el HUD holográfico Stark Mark VII 3D. |
-| **`Iniciar_JARVIS_GUI2_Nueva.bat`** | **GUI 2 Directa** | Abre directamente el Neural AI Command Center. |
-| **`Iniciar_Demo_JARVIS_UI_Nueva.bat`** | **Demo UI Nueva** | Modo demostración de escritorio 100% offline sin Ollama. |
-| **`Iniciar_Demo_JARVIS_UI_Antigua.bat`** | **Demo UI Clásica** | Modo demostración clásico 100% offline sin Ollama. |
+| **`Iniciar_JARVIS_Ollama_GUI.bat`** | **App de Escritorio Oficial** | Inicia el HUD holográfico 3D (Stark Mark VII) conectado a Ollama y telemetría. |
+| **`Iniciar_JARVIS_Ollama_Consola.bat`** | **Consola Interactiva** | Interacción multimodal por terminal con voz y automatización local. |
 | **`Iniciar_JARVIS_Telegram.bat`** | **Daemon Telegram** | Control remoto 100% en segundo plano vía bot de Telegram. |
 
 ---
